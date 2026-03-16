@@ -17,7 +17,7 @@ import time
 
 
 _SENSITIVITY_GA_DEFAULTS = dict(
-    generations       = 5,
+    generations       = 3,  # reduced for cloud speed
     mutation_rate     = 0.20,
     min_mutation_rate = 0.03,
     stagnation_limit  = 3,
@@ -45,9 +45,9 @@ def run_sensitivity(
     """
     from src.genetic_algorithm import FeatureSelectionGA
 
-    alphas    = alphas    or [0.5, 1.0, 1.5, 2.0]
-    betas     = betas     or [0.1, 0.5, 1.0, 2.0]
-    pop_sizes = pop_sizes or [5, 10, 15, 20]
+    alphas    = alphas    or [0.5, 1.5]          # 2 values — was 4 (64 runs -> 8 runs)
+    betas     = betas     or [0.1, 1.0]          # 2 values — was 4
+    pop_sizes = pop_sizes or [5, 10]            # 2 values — was 4
 
     total = len(alphas) * len(betas) * len(pop_sizes)
     print(f"\n[SENSITIVITY] Grid sweep: {total} combinations "

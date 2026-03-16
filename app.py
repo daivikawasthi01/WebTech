@@ -36,6 +36,8 @@ st.markdown("""
 }
 .metric-value { font-size: 28px; font-weight: 700; color: #a78bfa; }
 .metric-label { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+.status-ok   { color: #34d399; font-weight: 600; }
+.status-warn { color: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -103,7 +105,7 @@ with st.sidebar:
     beta        = st.slider("Beta (parsimony)",  0.0, 2.0, 0.5, 0.1)
     mut_rate    = st.slider("Initial mutation",  0.05, 0.40, 0.20, 0.01)
     min_mut     = st.slider("Min mutation",      0.01, 0.10, 0.03, 0.01)
-    stagnation  = st.slider("Stagnation limit",  2, 10, 5)
+    stagnation  = st.slider("Stagnation limit",  2, 10, 3)   # match main.py default
 
     st.markdown("**Research Modules**")
     n_trials    = st.slider("Trials per method", 5, 30, 5)    # default 5 for cloud speed
@@ -173,8 +175,9 @@ with tab1:
         run_full = st.button("▶ Run Full Pipeline", type="primary", use_container_width=True)
         run_ga   = st.button("▶ GA Only",           use_container_width=True)
         run_res  = st.button("▶ Research Modules",  use_container_width=True)
+        run_sens = st.button("▶ Sensitivity Only",  use_container_width=True)
 
-    if run_full or run_ga or run_res:
+    if run_full or run_ga or run_res or run_sens:
         cmd = [
             sys.executable, "main.py",
             "--repo", repo_path,
@@ -194,12 +197,26 @@ with tab1:
             if do_baselines: cmd.append("--run-baselines")
             if do_ablation:  cmd.append("--run-ablation")
             if do_stats:     cmd.append("--run-stats")
-            if do_multi:     cmd += ["--multi-repo", "--repos"] + repos_input.split()
-            if do_sens:      cmd.append("--run-sensitivity")
+            if do_multi:
+                repos_list = repos_input.split()
+                if repos_list:
+                    cmd += ["--multi-repo", "--repos"] + repos_list
+                else:
+                    st.warning("Repos field is empty — multi-repo skipped.")
             if do_report:    cmd.append("--run-report")
+        # Sensitivity fires for full pipeline, research modules, OR dedicated button
+        if (run_full or run_res or run_sens) and do_sens:
+            cmd.append("--run-sensitivity")
 
         with st.spinner("Running… check terminal for live output."):
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True,
+                                        timeout=900)  # 15 min hard cap
+            except subprocess.TimeoutExpired:
+                st.error("Pipeline timed out after 15 minutes. "
+                         "Try reducing population size or generations, "
+                         "or disable research modules.")
+                st.stop()
 
         if result.returncode == 0:
             st.success("Done!")
@@ -314,9 +331,12 @@ with tab3:
             "Random Subset": bl.get("random_subset", {}),
             "GA Selected":   bl.get("ga_selected",   {}),
         }
-        colors = ["#94a3b8", "#f59e0b", "#7c3aed"]
+        # Include XGBoost baseline if available (produced by baseline.py)
+        if bl.get("xgb_ga", {}).get("mean"):
+            methods["GA + XGBoost"] = bl["xgb_ga"]
+        colors = ["#94a3b8", "#f59e0b", "#7c3aed", "#f87171"][:len(methods)]
 
-        cols = st.columns(3)
+        cols = st.columns(len(methods))  # dynamic — works for 3 or 4 methods
         for col, (name, data) in zip(cols, methods.items()):
             col.metric(name, f"{data.get('mean', 0):.4f}",
                        delta=f"±{data.get('std', 0):.4f}", delta_color="off")
@@ -461,7 +481,11 @@ with tab5:
 
             left, right = st.columns([2, 1])
             with left:
-                max_val = max(df_risk["True Bugs"].max(), df_risk["Predicted Score"].max()) + 1
+                _max_true = df_risk["True Bugs"].max()
+                _max_pred = df_risk["Predicted Score"].max()
+                max_val   = (float(max(_max_true, _max_pred)) + 1
+                             if _max_true == _max_true and _max_pred == _max_pred
+                             else 10)  # NaN-safe fallback
                 fig = px.scatter(df_risk, x="True Bugs", y="Predicted Score",
                                  color="Risk Level",
                                  color_discrete_map={"High":   "#f87171",
@@ -528,7 +552,7 @@ with tab6:
             st.plotly_chart(fig, use_container_width=True)
 
         with right:
-            reductions = [r["reduction_pct"] for r in mr.values()]
+            reductions = [r.get("reduction_pct", 0) for r in mr.values()]
             fig2 = go.Figure(go.Bar(
                 x=repos, y=reductions, marker_color=colors, width=0.5,
                 text=[f"{v:.0f}%" for v in reductions], textposition="outside",
@@ -543,7 +567,7 @@ with tab6:
              "Files":       r["n_files"],
              "Total Feats": r["n_features_total"],
              "Selected":    r["n_selected"],
-             "Reduction":   f"{r['reduction_pct']}%",
+             "Reduction":   f"{r.get('reduction_pct', 0)}%",
              "GA MSE":      f"{r.get('ga_ann_mse', r['ga_best_mse']):.4f}",
              "All-Feat MSE":f"{r.get('all_features_mse', float('nan')):.4f}",
              "Improvement": f"{r.get('improvement_pct', float('nan')):+.1f}%",
@@ -552,7 +576,7 @@ with tab6:
         ]
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-        all_selected = [set(r["selected_features"]) for r in mr.values()]
+        all_selected = [set(r.get("selected_features", [])) for r in mr.values()]
         if all_selected:
             common = set.intersection(*all_selected)
             union  = set.union(*all_selected)
@@ -595,8 +619,9 @@ with tab7:
                 y=[f"α={a}" for a in alphas],
                 colorscale="Viridis",
                 reversescale=(metric_choice == "best_mse"),
-                text=[[f"{v:.4f}" if metric_choice == "best_mse" else str(int(v))
-                       for v in row] for row in z],
+                text=[[f"{v:.4f}" if metric_choice == "best_mse"
+                        else ("?" if v != v else str(int(v)))   # nan-safe
+                        for v in row] for row in z],
                 texttemplate="%{text}",
                 textfont=dict(size=11),
             ))
@@ -651,8 +676,11 @@ with tab7:
             ]
             st.dataframe(pd.DataFrame(flat), use_container_width=True, hide_index=True)
 
-        # Check if default settings are near-optimal
-        default = results.get("1.0", {}).get("0.5", {}).get(
+        # Check if default settings are near-optimal.
+        # Use actual grid midpoints (not hardcoded 1.0/0.5 which may not be in grid).
+        mid_a = str(alphas[len(alphas) // 2])
+        mid_b = str(betas[len(betas) // 2])
+        default = results.get(mid_a, {}).get(mid_b, {}).get(
             str(pop_sizes[len(pop_sizes) // 2]), {}
         ).get("best_mse", float("nan"))
         min_mse = min(
@@ -662,8 +690,8 @@ with tab7:
         if not (min_mse == float("inf") or default != default):
             pct = (default - min_mse) / (min_mse + 1e-9) * 100
             if pct < 5:
-                st.success(f"Default settings (alpha=1.0, beta=0.5) are within "
+                st.success(f"Mid-grid settings (alpha={mid_a}, beta={mid_b}) are within "
                            f"{pct:.1f}% of the global best — results are robust.")
             else:
-                st.warning(f"Default settings are {pct:.1f}% above the global optimum. "
+                st.warning(f"Mid-grid settings (alpha={mid_a}, beta={mid_b}) are {pct:.1f}% above the global optimum. "
                            f"Consider tuning alpha and beta for this repository.")
