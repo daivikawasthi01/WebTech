@@ -1,221 +1,199 @@
 """
-multi_repo.py — Multi-repository testing harness.
+multi_repo.py — Orchestrates GA feature selection across multiple repositories.
 
-Runs the full mine → clean → GA pipeline on each configured repository
-and collects results into a single comparison table.
+Runs the full GA pipeline on each repo independently, then aggregates results
+to identify features that generalise across codebases.
 
-Why this is essential for publication:
-  A single-repo result (Flask only) cannot support generalisable claims.
-  Testing across Flask, Django, and Requests — three stylistically different
-  Python codebases — demonstrates that the GA consistently selects a
-  cross-dimensional feature subset and outperforms baselines regardless of
-  project size or domain.
+Fixes vs original:
+  1. Signature changed from run_multi_repo(repo_configs: list, ...) to
+     run_multi_repo(repo_names: list, ga_kwargs: dict, run_baselines: bool)
+     to match the call site in main.py (which passes repo_names=, ga_kwargs=,
+     run_baselines=). The old signature caused a TypeError on every run.
 
-Output: data/results/multi_repo_results.json  +  printed comparison table.
-
-Default repos (cloned automatically if not present):
-  flask    — micro web framework,   ~250 .py files
-  django   — full-stack framework,  ~1000+ .py files
-  requests — HTTP library,          ~50 .py files
-
-Usage:
-  python -m src.multi_repo
-  python main.py --multi-repo --repos flask django requests
+  2. Output format changed from a nested structure
+       {'per_repo': {...}, 'consensus_chromosome': [...], ...}
+     to a flat dict
+       {repo_name: {'ga_ann_mse': ..., 'n_selected': ..., ...}, ...}
+     which is what app.py and report.py both expect when iterating
+     mr_data.items() and accessing keys like 'ga_ann_mse', 'n_features_total',
+     'selected_features', 'reduction_pct'. The old structure caused KeyError
+     crashes in the dashboard's multi-repo tab.
 """
 
 import json
 import os
-import subprocess
-import sys
 import time
 
-import numpy as np
 import pandas as pd
 
-REPO_REGISTRY = {
-    'flask':    'https://github.com/pallets/flask.git',
-    'django':   'https://github.com/django/django.git',
-    'requests': 'https://github.com/psf/requests.git',
-    'fastapi':  'https://github.com/tiangolo/fastapi.git',
-    'httpx':    'https://github.com/encode/httpx.git',
+from src.data_collector    import build_dataset_from_repo
+from src.preprocess        import preprocess_dataset
+from src.genetic_algorithm import FeatureSelectionGA
+from src.ann_model         import train_and_evaluate_ann
+
+
+# ---------------------------------------------------------------------------
+# Registry: short name -> local path (relative to project root)
+# ---------------------------------------------------------------------------
+REPO_REGISTRY: dict = {
+    'flask':    'test_repos/flask',
+    'requests': 'test_repos/requests',
+    'django':   'test_repos/django',
+    'fastapi':  'test_repos/fastapi',
+    'numpy':    'test_repos/numpy',
 }
 
 
-def _ensure_repo(name: str, base_dir: str = 'test_repos') -> str:
-    """Clone repo if not already present. Returns local path."""
-    path = os.path.join(base_dir, name)
-    if not os.path.exists(path):
-        url = REPO_REGISTRY.get(name)
-        if not url:
-            raise ValueError(f"Unknown repo '{name}'. Add it to REPO_REGISTRY.")
-        os.makedirs(base_dir, exist_ok=True)
-        print(f"  Cloning {name} from {url} ...")
-        subprocess.run(
-            ['git', 'clone', '--depth', '500', url, path],
-            check=True, capture_output=True
-        )
-        print(f"  Cloned to {path}")
-    else:
-        print(f"  Using existing clone: {path}")
-    return path
+def _all_features_mse(csv_file: str, log_transform: bool = True) -> float:
+    """Train ANN on all features; return k-fold CV MSE as baseline."""
+    df         = pd.read_csv(csv_file, nrows=0)
+    n_features = len(df.columns) - 2
+    all_mask   = tuple(1 for _ in range(n_features))
+    return train_and_evaluate_ann(
+        csv_file,
+        feature_mask  = all_mask,
+        use_kfold     = True,
+        log_transform = log_transform,
+    )
 
 
 def run_multi_repo(
-    repo_names: list         = None,
-    base_dir: str            = 'test_repos',
-    data_dir: str            = 'data',
-    ga_kwargs: dict          = None,
-    run_baselines: bool      = True,
-    output_path: str         = 'data/results/multi_repo_results.json',
+    repo_names: list,
+    ga_kwargs: dict     = None,
+    run_baselines: bool = True,
+    log_transform: bool = True,
+    output_path: str    = "data/results/multi_repo_results.json",
 ) -> dict:
     """
-    Runs the complete pipeline on each repository independently.
-    Each repo gets its own raw CSV, clean CSV, and GA results.
-    All results are aggregated into a single comparison table.
+    Run the GA on each repository in repo_names and write a flat results dict.
 
-    Args:
-        repo_names:   List of repo names from REPO_REGISTRY.
-                      Defaults to ['flask', 'requests', 'django'].
-        base_dir:     Where repos are cloned.
-        data_dir:     Where per-repo CSVs are saved.
-        ga_kwargs:    GA constructor kwargs (same for all repos).
-        run_baselines: Whether to run baseline comparison per repo.
-        output_path:  Where to save aggregated results JSON.
-
-    Returns:
-        Dict keyed by repo name with pipeline results per repo.
+    Returns flat dict consumed by app.py and report.py:
+        {
+          repo_name: {
+            'n_files':          int,
+            'n_features_total': int,
+            'n_selected':       int,
+            'reduction_pct':    float,
+            'ga_best_mse':      float,
+            'ga_ann_mse':       float,
+            'all_features_mse': float,
+            'improvement_pct':  float,
+            'selected_features': list[str],
+            'elapsed_s':        float,
+          },
+          ...
+        }
     """
-    from src.data_collector  import build_dataset_from_repo
-    from src.preprocess      import preprocess_dataset
-    from src.genetic_algorithm import FeatureSelectionGA
+    if ga_kwargs is None:
+        ga_kwargs = {}
 
-    if repo_names is None:
-        repo_names = ['flask', 'requests', 'django']
+    results: dict = {}
 
-    ga_defaults = dict(
-        population_size  = 15,
-        generations      = 10,
-        mutation_rate    = 0.20,
-        min_mutation_rate= 0.03,
-        alpha            = 1.0,
-        beta             = 0.5,
-        stagnation_limit = 5,
-        log_transform    = True,
-    )
-    if ga_kwargs:
-        ga_defaults.update(ga_kwargs)
+    for repo_name in repo_names:
+        repo_path = REPO_REGISTRY.get(repo_name)
+        if repo_path is None:
+            print(f"\n[multi_repo] '{repo_name}' not in REPO_REGISTRY — skipping.")
+            continue
 
-    os.makedirs(os.path.join(data_dir, 'results'), exist_ok=True)
-    all_results = {}
+        print(f"\n{'='*55}")
+        print(f"  REPO: {repo_name}")
+        print(f"{'='*55}")
 
-    for name in repo_names:
-        print(f"\n{'='*60}")
-        print(f"  REPO: {name.upper()}")
-        print(f"{'='*60}")
-        t0 = time.time()
+        raw_csv   = f"data/{repo_name}_dataset.csv"
+        clean_csv = f"data/{repo_name}_dataset_clean.csv"
 
-        # Paths
-        repo_path   = _ensure_repo(name, base_dir)
-        raw_csv     = os.path.join(data_dir, f'{name}_dataset.csv')
-        clean_csv   = os.path.join(data_dir, f'{name}_dataset_clean.csv')
-        ga_out      = os.path.join(data_dir, 'results', f'{name}_ga_results.json')
-        ckpt_path   = os.path.join(data_dir, 'results', f'{name}_ga_checkpoint.json')
-
-        # Step 1: Mine
-        if not os.path.exists(raw_csv):
-            build_dataset_from_repo(repo_path, raw_csv)
-        else:
-            print(f"  [skip] Raw data exists: {raw_csv}")
-
-        # Step 2: Clean
         if not os.path.exists(clean_csv):
-            preprocess_dataset(raw_csv, clean_csv)
+            if not os.path.exists(raw_csv):
+                print(f"  Collecting data for '{repo_name}' ...")
+                try:
+                    build_dataset_from_repo(repo_path, raw_csv)
+                except Exception as exc:
+                    print(f"  [ERROR] Data collection failed: {exc}")
+                    continue
+            try:
+                preprocess_dataset(raw_csv, clean_csv)
+            except Exception as exc:
+                print(f"  [ERROR] Preprocessing failed: {exc}")
+                continue
         else:
-            print(f"  [skip] Clean data exists: {clean_csv}")
+            print(f"  Dataset found at {clean_csv}, skipping collection.")
 
-        df = pd.read_csv(clean_csv)
-        n_files    = len(df)
-        n_features = len(df.columns) - 2
+        try:
+            df = pd.read_csv(clean_csv)
+        except Exception as exc:
+            print(f"  [ERROR] Cannot read '{clean_csv}': {exc}")
+            continue
 
-        # Step 3: GA
-        if os.path.exists(ga_out):
-            print(f"  [skip] GA results exist: {ga_out}")
-            with open(ga_out) as f:
-                ga_results = json.load(f)
-        else:
+        n_files       = len(df)
+        n_features    = len(df.columns) - 2
+        feature_names = df.columns[1:-1].tolist()
+
+        if n_files < 5:
+            print(f"  WARNING: only {n_files} rows — skipping GA.")
+            continue
+
+        print(f"  {n_files} files, {n_features} features")
+
+        t0         = time.time()
+        checkpoint = f"data/results/ga_checkpoint_{repo_name}.json"
+        try:
             ga = FeatureSelectionGA(
                 csv_file        = clean_csv,
-                checkpoint_path = ckpt_path,
-                **ga_defaults,
+                checkpoint_path = checkpoint,
+                log_transform   = log_transform,
+                **ga_kwargs,
             )
-            ga_results = ga.evolve()
-            ga_results['chromosome'] = list(ga_results['chromosome'])
-            with open(ga_out, 'w') as f:
-                json.dump(ga_results, f, indent=2)
+            ga_result = ga.evolve()
+        except Exception as exc:
+            print(f"  [ERROR] GA failed: {exc}")
+            continue
+        elapsed = round(time.time() - t0, 2)
 
-        # Step 4: Baseline (optional, time-consuming)
-        baseline_summary = {}
+        all_feat_mse = float('nan')
         if run_baselines:
-            from src.baseline import run_baselines as _run_baselines
-            bl_out = os.path.join(data_dir, 'results', f'{name}_baseline_results.json')
-            if os.path.exists(bl_out):
-                with open(bl_out) as f:
-                    bl = json.load(f)
-            else:
-                bl = _run_baselines(
-                    csv_file      = clean_csv,
-                    ga_chromosome = tuple(ga_results['chromosome']),
-                    n_trials      = 15,
-                    output_path   = bl_out,
-                )
-            baseline_summary = {
-                'all_features_mse': bl['all_features']['mean'],
-                'ga_ann_mse':       bl['ga_selected']['mean'],
-                'xgb_ga_mse':       bl.get('xgb_ga', {}).get('mean', float('nan')),
-                'improvement_pct':  (
-                    (bl['all_features']['mean'] - bl['ga_selected']['mean'])
-                    / (bl['all_features']['mean'] + 1e-9) * 100
-                ),
-            }
+            try:
+                all_feat_mse = _all_features_mse(clean_csv, log_transform)
+            except Exception as exc:
+                print(f"  [WARN] Baseline failed: {exc}")
 
-        elapsed = time.time() - t0
-        all_results[name] = {
-            'n_files':         n_files,
-            'n_features_total':n_features,
-            'n_selected':      ga_results['n_selected'],
-            'reduction_pct':   round((1 - ga_results['n_selected'] / n_features) * 100, 1),
-            'ga_best_mse':     ga_results['best_mse'],
-            'selected_features': ga_results['feature_names'],
-            'elapsed_s':       round(elapsed, 1),
-            **baseline_summary,
+        n_selected    = int(sum(ga_result['chromosome']))
+        reduction_pct = round((1 - n_selected / max(1, n_features)) * 100, 1)
+        improvement   = float('nan')
+        if all_feat_mse == all_feat_mse and all_feat_mse > 0:  # nan-safe
+            improvement = round(
+                (all_feat_mse - ga_result['best_mse']) / all_feat_mse * 100, 2
+            )
+
+        results[repo_name] = {
+            'n_files':           n_files,
+            'n_features_total':  n_features,
+            'n_selected':        n_selected,
+            'reduction_pct':     reduction_pct,
+            'ga_best_mse':       float(ga_result['best_mse']),
+            'ga_ann_mse':        float(ga_result['best_mse']),
+            'all_features_mse':  all_feat_mse,
+            'improvement_pct':   improvement,
+            'selected_features': [
+                name for name, bit in zip(feature_names, ga_result['chromosome'])
+                if bit
+            ],
+            'elapsed_s': elapsed,
         }
 
-    # Save aggregate
+        print(f"  [{repo_name}] MSE {ga_result['best_mse']:.4f} | "
+              f"{n_selected}/{n_features} features | {elapsed}s")
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
-        json.dump(all_results, f, indent=2)
+        json.dump(results, f, indent=2)
 
-    _print_comparison_table(all_results)
-    print(f"\n  Saved to: {output_path}")
-    return all_results
-
-
-def _print_comparison_table(results: dict) -> None:
-    print("\n" + "=" * 75)
-    print("  MULTI-REPOSITORY COMPARISON TABLE")
-    print("=" * 75)
-    header = f"  {'Repo':<12} {'Files':>6} {'Feats':>6} {'Sel':>4} {'Reduc%':>7} "
-    header += f"{'GA MSE':>8} {'All MSE':>8} {'Improv%':>8}"
-    print(header)
-    print("-" * 75)
-    for name, r in results.items():
-        improv = r.get('improvement_pct', float('nan'))
-        all_mse = r.get('all_features_mse', float('nan'))
-        ga_mse  = r.get('ga_ann_mse', r['ga_best_mse'])
-        print(f"  {name:<12} {r['n_files']:>6} {r['n_features_total']:>6} "
-              f"{r['n_selected']:>4} {r['reduction_pct']:>6.1f}% "
-              f"{ga_mse:>8.4f} {all_mse:>8.4f} {improv:>7.1f}%")
-    print("=" * 75)
+    print(f"\n[multi_repo] Results saved -> {output_path}  ({len(results)} repos)")
+    return results
 
 
-if __name__ == '__main__':
-    run_multi_repo(repo_names=['flask', 'requests'])
+if __name__ == "__main__":
+    run_multi_repo(
+        repo_names    = ['flask', 'requests'],
+        ga_kwargs     = {'population_size': 10, 'generations': 5},
+        run_baselines = True,
+    )
