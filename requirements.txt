@@ -1,16 +1,30 @@
-pandas
-numpy
-scikit-learn
-torch
-GitPython
-radon
-python-dateutil
-scipy
-streamlit
-plotly
-optuna
-jupyter
-matplotlib
-seaborn
-tqdm
-xgboost
+# Core data
+pandas>=2.0,<3.0
+numpy>=1.24,<2.0
+
+# ML / training
+scikit-learn>=1.3,<2.0
+torch>=2.0,<3.0
+scipy>=1.11,<2.0
+xgboost>=2.0,<3.0
+optuna>=3.3,<4.0
+
+# Git mining
+GitPython>=3.1,<4.0
+python-dateutil>=2.8,<3.0
+
+# Code metrics
+radon>=6.0,<7.0
+
+# Dashboard
+# altair must be pinned to <5 — Streamlit <=1.28 imports altair.vegalite.v4
+# which was removed in altair 5. Pin both together.
+streamlit>=1.28,<1.29
+altair>=4.2,<5.0
+plotly>=5.18,<6.0
+
+# Notebook support (dev only)
+jupyter>=1.0,<2.0
+matplotlib>=3.7,<4.0
+seaborn>=0.13,<1.0
+tqdm>=4.66,<5.0
