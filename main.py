@@ -259,7 +259,8 @@ def main():
     # ── Step 4: Baselines ─────────────────────────────────────────────────────
     if args.run_baselines:
         BASELINE_PATH = "data/results/baseline_results.json"
-        if os.path.exists(BASELINE_PATH) and not (args.force_collect or args.force_all):
+        if (os.path.exists(BASELINE_PATH) and os.path.getsize(BASELINE_PATH) > 50
+                and not (args.force_collect or args.force_all)):
             print("\n[STEP 4] Skipping — baseline_results.json already exists.")
         else:
             from src.baseline import run_baselines
@@ -273,7 +274,8 @@ def main():
     # ── Step 5: Ablation ──────────────────────────────────────────────────────
     if args.run_ablation:
         ABLATION_PATH = "data/results/ablation_results.json"
-        if os.path.exists(ABLATION_PATH) and not (args.force_collect or args.force_all):
+        if (os.path.exists(ABLATION_PATH) and os.path.getsize(ABLATION_PATH) > 50
+                and not (args.force_collect or args.force_all)):
             print("\n[STEP 5] Skipping — ablation_results.json already exists.")
         else:
             from src.ablation import run_ablation
@@ -286,7 +288,8 @@ def main():
     # ── Step 6: Stats ─────────────────────────────────────────────────────────
     if args.run_stats:
         STATS_PATH = "data/results/stats_results.json"
-        if os.path.exists(STATS_PATH) and not (args.force_collect or args.force_all):
+        if (os.path.exists(STATS_PATH) and os.path.getsize(STATS_PATH) > 50
+                and not (args.force_collect or args.force_all)):
             print("\n[STEP 6] Skipping — stats_results.json already exists.")
         else:
             from src.stats import run_significance_tests
@@ -300,7 +303,8 @@ def main():
     # ── Step 7: Multi-repo ────────────────────────────────────────────────────
     if args.multi_repo:
         MULTI_PATH = "data/results/multi_repo_results.json"
-        if os.path.exists(MULTI_PATH) and not (args.force_collect or args.force_all):
+        if (os.path.exists(MULTI_PATH) and os.path.getsize(MULTI_PATH) > 50
+                and not (args.force_collect or args.force_all)):
             print("\n[STEP 7] Skipping — multi_repo_results.json already exists.")
         else:
             from src.multi_repo import run_multi_repo
@@ -322,7 +326,9 @@ def main():
     # ── Step 8: Sensitivity ───────────────────────────────────────────────────
     if args.run_sensitivity:
         SENS_PATH = "data/results/sensitivity_results.json"
-        if os.path.exists(SENS_PATH) and not (args.force_collect or args.force_all):
+        _sens_valid = (os.path.exists(SENS_PATH)
+                        and os.path.getsize(SENS_PATH) > 50)  # >50 bytes = not empty/corrupt
+        if _sens_valid and not (args.force_collect or args.force_all):
             print("\n[STEP 8] Skipping — sensitivity_results.json already exists.")
         else:
             from src.sensitivity import run_sensitivity
@@ -334,7 +340,8 @@ def main():
     # regenerate unless results have changed. Use --force-all to force refresh.
     if args.run_report:
         REPORT_PATH = "data/results/maintainability_report.html"
-        if os.path.exists(REPORT_PATH) and not (args.force_collect or args.force_all):
+        if (os.path.exists(REPORT_PATH) and os.path.getsize(REPORT_PATH) > 50
+                and not (args.force_collect or args.force_all)):
             print(f"\n[STEP 9] Skipping — report already exists at {REPORT_PATH}")
         else:
             from src.report import generate_report

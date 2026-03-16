@@ -181,38 +181,67 @@ with tab1:
         run_res  = st.button("▶ Research Modules",  use_container_width=True)
         run_sens = st.button("▶ Sensitivity Only",  use_container_width=True)
 
-    # ── Sensitivity Only — runs sensitivity.py directly, skips GA entirely ──
+    # ── Sensitivity Only — calls main.py with --run-sensitivity only ─────────
+    # Skips mining/cleaning (uses existing CSVs) and skips the full GA by
+    # using the existing ga_results.json chromosome. main.py already has
+    # skip-guards on Steps 1 and 2. We add --run-sensitivity to trigger
+    # Step 8 without baselines/ablation/stats.
     if run_sens:
         if not exists(clean_file):
-            st.error(f"Clean dataset not found: {clean_file}\n"
-                     "Run the full pipeline first to generate it.")
-        else:
-            sens_script = (
-                f"import sys; sys.path.insert(0, '.'); "
-                f"from src.sensitivity import run_sensitivity; "
-                f"run_sensitivity('{clean_file}')"
+            st.error(
+                f"Clean dataset not found: **{clean_file}**  \n"
+                "Run the full pipeline first (GA Only is enough) to generate it."
             )
-            with st.spinner("Running sensitivity sweep (8 GA runs)…"):
+        else:
+            _app_dir = os.path.dirname(os.path.abspath(__file__))
+            _sens_cmd = [
+                sys.executable, "main.py",
+                "--repo",           repo_path,
+                "--raw-file",       raw_file,
+                "--processed-file", clean_file,
+                "--pop-size",       str(pop_size),
+                "--generations",    str(generations),
+                "--alpha",          str(alpha),
+                "--beta",           str(beta),
+                "--mutation-rate",  str(mut_rate),
+                "--min-mutation",   str(min_mut),
+                "--stagnation",     str(stagnation),
+                "--run-sensitivity",
+            ]
+            with st.spinner("Running sensitivity sweep (8 GA runs, ~3 min)…"):
                 try:
-                    result = subprocess.run(
-                        [sys.executable, "-c", sens_script],
-                        capture_output=True, text=True, timeout=600
+                    _sens_result = subprocess.run(
+                        _sens_cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=600,
+                        cwd=_app_dir,   # ensure correct working directory
                     )
                 except subprocess.TimeoutExpired:
-                    st.error("Sensitivity timed out after 10 minutes.")
+                    st.error("Sensitivity timed out after 10 minutes. "
+                             "Try reducing population size in the sidebar.")
                     st.stop()
                 except Exception as exc:
                     st.error(f"Failed to launch sensitivity: {exc}")
                     st.stop()
-            if result.returncode == 0:
+
+            if _sens_result.returncode == 0:
                 st.success("Sensitivity complete!")
                 st.rerun()
             else:
-                st.error("Sensitivity failed.")
-                with st.expander("Error output"):
-                    st.code(result.stderr or result.stdout)
+                st.error("Sensitivity failed — see error below.")
+                with st.expander("Error output (stderr)"):
+                    st.code(_sens_result.stderr or "(no stderr)")
+                with st.expander("Output (stdout)"):
+                    st.code(_sens_result.stdout or "(no stdout)")
 
     # ── Full pipeline / GA only / Research modules ─────────────────────────
+    if run_full and do_sens:
+        st.warning(
+            "**Tip:** Sensitivity runs last (Step 8). On Streamlit Cloud the full "
+            "pipeline may time out before reaching it.  \n"
+            "Run **GA Only** first, then click **Sensitivity Only** for reliable results."
+        )
     if run_full or run_ga or run_res:
         cmd = [
             sys.executable, "main.py",
@@ -245,9 +274,9 @@ with tab1:
         with st.spinner("Running… check terminal for live output."):
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True,
-                                        timeout=900)  # 15 min hard cap
+                                        timeout=1800)  # 30 min hard cap
             except subprocess.TimeoutExpired:
-                st.error("Pipeline timed out after 15 minutes. "
+                st.error("Pipeline timed out after 30 minutes. "
                          "Try reducing population size or generations, "
                          "or disable research modules.")
                 st.stop()
