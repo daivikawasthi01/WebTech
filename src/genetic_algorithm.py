@@ -1,20 +1,32 @@
 """
 genetic_algorithm.py
 
-Changes:
-1. Adaptive mutation rate: exponential decay from mutation_rate -> min_mutation_rate.
-   (Previously the formula was linear despite the docstring claiming exponential;
-    and the 'decay' variable was computed but never referenced. Both are now fixed.)
-2. Generation history for Streamlit convergence plotting.
-3. evolve() returns a full results dict.
-4. tournament_selection k_safe guard: random.sample(scored, k) raises ValueError
-   when len(scored) < k (e.g. --pop-size 1 or 2). Fixed with min(k, len(scored)).
-5. crossover single-feature guard: randint(1, num_features-1) raises ValueError
-   when num_features == 1. Returns parents unchanged in that case.
+New additions vs previous version:
+1. Adaptive mutation rate: starts at `mutation_rate` (high, for exploration),
+   decays each generation toward `min_mutation_rate` (low, for exploitation).
+   Prevents premature convergence early on while refining solutions late.
+
+2. Generation history: every generation appends a dict to `self.history`
+   containing generation number, best MSE, best fitness, and feature count.
+   The Streamlit dashboard uses this to plot the convergence curve.
+
+3. evolve() now returns a results dict (chromosome + history + metadata)
+   instead of just the chromosome tuple, making downstream consumption cleaner.
+
+4. Checkpoint/resume: GA saves state after every generation. Interrupted runs
+   resume from the last checkpoint instead of starting over.
+
+5. Elitism: top 2 chromosomes are copied unchanged to the next generation.
+   The best solution found so far is never lost.
+
+6. Stagnation detection: stops early if no improvement for N consecutive
+   generations. Saves computation when the population has converged.
+
+7. epochs reduced to 30 in calculate_fitness (was 50) — fast path used during
+   GA evolution. Final/research evaluations use use_kfold=True with more epochs.
 """
 
 import json
-import math
 import os
 import random
 import pandas as pd
@@ -25,15 +37,15 @@ class FeatureSelectionGA:
     def __init__(
         self,
         csv_file: str,
-        population_size: int = 10,
-        generations: int = 5,
-        mutation_rate: float = 0.20,
+        population_size: int   = 8,
+        generations: int       = 5,
+        mutation_rate: float   = 0.20,
         min_mutation_rate: float = 0.02,
-        alpha: float = 1.0,
-        beta: float = 0.5,
-        stagnation_limit: int = 5,
-        log_transform: bool = True,
-        checkpoint_path: str = "data/results/ga_checkpoint.json",
+        alpha: float           = 1.0,
+        beta: float            = 0.5,
+        stagnation_limit: int  = 3,
+        log_transform: bool    = True,
+        checkpoint_path: str   = "data/results/ga_checkpoint.json",
     ):
         self.csv_file          = csv_file
         self.population_size   = population_size
@@ -51,7 +63,7 @@ class FeatureSelectionGA:
         self.feature_names = df.columns[1:-1].tolist()
 
         self.evaluation_cache: dict = {}
-        self.history: list = []
+        self.history: list          = []
 
     # -----------------------------------------------------------------------
     # Checkpoint save / resume
@@ -60,15 +72,15 @@ class FeatureSelectionGA:
                          best_fitness, best_mse, stagnation):
         os.makedirs(os.path.dirname(self.checkpoint_path) or '.', exist_ok=True)
         ckpt = {
-            'generation':   generation,
-            'population':   [list(c) for c in population],
-            'best_chrom':   list(best_chrom) if best_chrom else None,
+            'generation':  generation,
+            'population':  [list(c) for c in population],
+            'best_chrom':  list(best_chrom) if best_chrom else None,
             'best_fitness': float(best_fitness),
-            'best_mse':     float(best_mse),
-            'stagnation':   stagnation,
-            'history':      self.history,
-            'cache':        {str(k): list(v)
-                             for k, v in self.evaluation_cache.items()},
+            'best_mse':    float(best_mse),
+            'stagnation':  stagnation,
+            'history':     self.history,
+            'cache':       {str(k): list(v)
+                            for k, v in self.evaluation_cache.items()},
         }
         with open(self.checkpoint_path, 'w') as f:
             json.dump(ckpt, f)
@@ -102,16 +114,11 @@ class FeatureSelectionGA:
     # Adaptive mutation rate
     # -----------------------------------------------------------------------
     def _current_mutation_rate(self, generation: int) -> float:
-        """
-        Exponential decay from mutation_rate -> min_mutation_rate.
-        Formula: rate = min + (max - min) * exp(-decay * gen)
-        """
         if self.generations <= 1:
             return self.min_mutation_rate
-        decay = 5.0 / self.generations
-        rate  = (self.min_mutation_rate
-                 + (self.mutation_rate - self.min_mutation_rate)
-                 * math.exp(-decay * generation))
+        rate = (self.min_mutation_rate
+                + (self.mutation_rate - self.min_mutation_rate)
+                * (1.0 - generation / self.generations))
         return max(self.min_mutation_rate, rate)
 
     # -----------------------------------------------------------------------
@@ -134,15 +141,21 @@ class FeatureSelectionGA:
     # Fitness
     # -----------------------------------------------------------------------
     def calculate_fitness(self, chromosome: tuple) -> tuple:
+        """
+        Returns (fitness, mse). Memoised — identical chromosomes never re-trained.
+        epochs=30 (was 50) for speed during GA evolution. The final/research
+        evaluations use use_kfold=True with more epochs.
+        """
         if chromosome in self.evaluation_cache:
             return self.evaluation_cache[chromosome]
+
         mse = train_and_evaluate_ann(
             self.csv_file,
-            feature_mask=list(chromosome),
-            epochs=50,
-            batch_size=16,
-            use_kfold=False,
-            log_transform=self.log_transform,
+            feature_mask  = list(chromosome),
+            epochs        = 30,       # reduced from 50 for cloud speed
+            batch_size    = 16,
+            use_kfold     = False,    # fast single split during evolution
+            log_transform = self.log_transform,
         )
         n_selected = sum(chromosome)
         fitness = (self.alpha * (1.0 / (mse + 1e-6))
@@ -154,20 +167,11 @@ class FeatureSelectionGA:
     # Selection, crossover, mutation
     # -----------------------------------------------------------------------
     def tournament_selection(self, scored: list, k: int = 3) -> tuple:
-        # FIX: random.sample(scored, k) raises ValueError when len(scored) < k
-        # (e.g. --pop-size 1 or --pop-size 2). Clamp k to available pool size.
-        k_safe     = min(k, len(scored))
-        tournament = random.sample(scored, k_safe)
+        tournament = random.sample(scored, k)
         tournament.sort(key=lambda x: x[1], reverse=True)
         return tournament[0][0]
 
     def crossover(self, p1: tuple, p2: tuple) -> tuple:
-        # FIX: randint(1, self.num_features - 1) raises ValueError when
-        # num_features == 1 because the range is empty (randint(1, 0)).
-        # Return parents unchanged — crossover has no meaningful effect on
-        # length-1 chromosomes anyway.
-        if self.num_features <= 1:
-            return p1, p2
         point = random.randint(1, self.num_features - 1)
         c1 = self._ensure_valid(p1[:point] + p2[point:])
         c2 = self._ensure_valid(p2[:point] + p1[point:])
@@ -183,18 +187,18 @@ class FeatureSelectionGA:
     # -----------------------------------------------------------------------
     def evolve(self) -> dict:
         print("=" * 55)
-        print("  NEURO-GENETIC FEATURE SELECTION")
+        print(" NEURO-GENETIC FEATURE SELECTION")
         print("=" * 55)
-        print(f"  Dataset    : {self.csv_file}")
-        print(f"  Features   : {self.num_features}")
-        print(f"  Population : {self.population_size} | Max gens : {self.generations}")
-        print(f"  Mutation   : {self.mutation_rate:.2f} -> {self.min_mutation_rate:.2f} (adaptive)")
-        print(f"  Alpha: {self.alpha}  Beta: {self.beta}  Stagnation: {self.stagnation_limit}")
+        print(f" Dataset   : {self.csv_file}")
+        print(f" Features  : {self.num_features}")
+        print(f" Population: {self.population_size} | Max gens: {self.generations}")
+        print(f" Mutation  : {self.mutation_rate:.2f} -> {self.min_mutation_rate:.2f} (adaptive)")
+        print(f" Alpha: {self.alpha}  Beta: {self.beta}  Stagnation: {self.stagnation_limit}")
         print("=" * 55 + "\n")
 
-        self.history = []
-        population = [self.generate_random_chromosome()
-                      for _ in range(self.population_size)]
+        self.history  = []
+        population    = [self.generate_random_chromosome()
+                         for _ in range(self.population_size)]
         best_chrom_ever   = None
         best_fitness_ever = -float('inf')
         best_mse_ever     = float('inf')
@@ -217,12 +221,12 @@ class FeatureSelectionGA:
 
             scored = []
             for i, chrom in enumerate(population):
-                cached = chrom in self.evaluation_cache
-                fitness, mse = self.calculate_fitness(chrom)
+                cached          = chrom in self.evaluation_cache
+                fitness, mse    = self.calculate_fitness(chrom)
                 scored.append((chrom, fitness, mse))
                 label = "(cached)" if cached else ""
                 print(f"  [{i+1:02d}] feats: {sum(chrom):02d}/{self.num_features}"
-                      f"  MSE: {mse:.4f}  fit: {fitness:.4f}  {label}")
+                      f"  MSE: {mse:.4f}  fit: {fitness:.4f} {label}")
 
             gen_best = max(scored, key=lambda x: x[1])
             if gen_best[1] > best_fitness_ever:
@@ -242,7 +246,7 @@ class FeatureSelectionGA:
                 'mutation_rate':   float(current_rate),
             })
 
-            print(f"  >> Gen best  — feats: {sum(gen_best[0])} | "
+            print(f"  >> Gen best — feats: {sum(gen_best[0])} | "
                   f"MSE: {gen_best[2]:.4f} | Fit: {gen_best[1]:.4f}")
             print(f"  >> Global best MSE: {best_mse_ever:.4f} "
                   f"stagnation: {stagnation}/{self.stagnation_limit}\n")
@@ -254,11 +258,12 @@ class FeatureSelectionGA:
                 print(f"  [CONVERGED] No improvement for {self.stagnation_limit} gens.\n")
                 break
 
+            # Build next generation
             scored.sort(key=lambda x: x[1], reverse=True)
-            next_gen = [item[0] for item in scored[:2]]  # elitism: top 2
+            next_gen = [item[0] for item in scored[:2]]   # elitism: top 2
             while len(next_gen) < self.population_size:
-                p1, p2 = (self.tournament_selection(scored),
-                          self.tournament_selection(scored))
+                p1 = self.tournament_selection(scored)
+                p2 = self.tournament_selection(scored)
                 c1, c2 = self.crossover(p1, p2)
                 next_gen.append(self.mutate(c1, gen))
                 if len(next_gen) < self.population_size:
@@ -269,14 +274,14 @@ class FeatureSelectionGA:
                           for i, v in enumerate(best_chrom_ever) if v == 1]
 
         print("=" * 55)
-        print("  OPTIMIZATION COMPLETE")
-        print(f"  Best MSE     : {best_mse_ever:.4f}")
-        print(f"  Best Fitness : {best_fitness_ever:.4f}")
-        print(f"  Features     : {sum(best_chrom_ever)}/{self.num_features}")
-        print(f"  Cache hits   : {len(self.evaluation_cache)} unique evals")
-        print("\n  Selected features:")
+        print(" OPTIMIZATION COMPLETE")
+        print(f" Best MSE    : {best_mse_ever:.4f}")
+        print(f" Best Fitness: {best_fitness_ever:.4f}")
+        print(f" Features    : {sum(best_chrom_ever)}/{self.num_features}")
+        print(f" Cache hits  : {len(self.evaluation_cache)} unique evals")
+        print("\n Selected features:")
         for name in selected_names:
-            print(f"    + {name}")
+            print(f"   + {name}")
         print("=" * 55)
 
         if os.path.exists(self.checkpoint_path):
@@ -294,10 +299,13 @@ class FeatureSelectionGA:
         }
 
 
+# ---------------------------------------------------------------------------
+# Standalone test
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     ga = FeatureSelectionGA(
-        csv_file="data/flask_dataset.csv",
-        population_size=10, generations=4,
+        csv_file="data/flask_dataset_clean.csv",
+        population_size=8, generations=5,
         mutation_rate=0.20, min_mutation_rate=0.03,
         alpha=1.0, beta=0.5, stagnation_limit=3,
     )

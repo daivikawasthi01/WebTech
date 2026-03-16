@@ -36,11 +36,11 @@ def main():
     parser.add_argument("--processed-file", type=str, default="data/flask_dataset_clean.csv")
 
     # ── GA hyperparameters ────────────────────────────────────────────────────
-    parser.add_argument("--pop-size",       type=int,   default=15)
-    parser.add_argument("--generations",    type=int,   default=10)
+    parser.add_argument("--pop-size",       type=int,   default=8)   # reduced for cloud speed
+    parser.add_argument("--generations",    type=int,   default=5)   # reduced for cloud speed
     parser.add_argument("--mutation-rate",  type=float, default=0.20)
     parser.add_argument("--min-mutation",   type=float, default=0.03)
-    parser.add_argument("--stagnation",     type=int,   default=5)
+    parser.add_argument("--stagnation",     type=int,   default=3)   # reduced for cloud speed
     parser.add_argument("--alpha",          type=float, default=1.0)
     parser.add_argument("--beta",           type=float, default=0.5)
     parser.add_argument("--log-transform",  action="store_true", default=True)
@@ -66,7 +66,7 @@ def main():
                         help="Run alpha/beta/pop_size sensitivity sweep")
     parser.add_argument("--run-report",      action="store_true",
                         help="Generate standalone HTML report from all results")
-    parser.add_argument("--n-trials",        type=int, default=20,
+    parser.add_argument("--n-trials",        type=int, default=5,
                         help="Number of trials for baseline/ablation/stats")
 
     # ── Pipeline toggles ──────────────────────────────────────────────────────
@@ -107,9 +107,9 @@ def main():
             print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
             os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
             result = subprocess.run(
-            ["git", "clone", clone_url, args.repo],
-            capture_output=True, text=True
-        )
+                ["git", "clone", "--depth=200", clone_url, args.repo],
+                capture_output=True, text=True
+            )
             if result.returncode != 0:
                 print(f"[ERROR] Clone failed:\n{result.stderr}")
                 raise RuntimeError(f"Could not clone {clone_url}")

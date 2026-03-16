@@ -92,15 +92,13 @@ with st.sidebar:
     st.title("NeuroGA Config")
     st.markdown("---")
 
-    # app.py sidebar
-    repo_path = st.text_input("Repository path", "test_repos/flask",
-                           help="Use test_repos/flask, test_repos/requests, or test_repos/django")
+    repo_path  = st.text_input("Repository path", "test_repos/flask")
     raw_file   = st.text_input("Raw data file",   "data/flask_dataset.csv")
     clean_file = st.text_input("Clean data file",  "data/flask_dataset_clean.csv")
 
     st.markdown("**GA Settings**")
-    pop_size    = st.slider("Population size",   5,  30, 15)
-    generations = st.slider("Max generations",   3,  30, 10)
+    pop_size    = st.slider("Population size",   5,  30, 8)    # default 8 for cloud speed
+    generations = st.slider("Max generations",   3,  30, 5)    # default 5 for cloud speed
     alpha       = st.slider("Alpha (accuracy)",  0.1, 3.0, 1.0, 0.1)
     beta        = st.slider("Beta (parsimony)",  0.0, 2.0, 0.5, 0.1)
     mut_rate    = st.slider("Initial mutation",  0.05, 0.40, 0.20, 0.01)
@@ -108,13 +106,13 @@ with st.sidebar:
     stagnation  = st.slider("Stagnation limit",  2, 10, 5)
 
     st.markdown("**Research Modules**")
-    n_trials    = st.slider("Trials per method", 5, 30, 20)
+    n_trials    = st.slider("Trials per method", 5, 30, 5)    # default 5 for cloud speed
     tune_trials = st.slider("Optuna trials",    10, 100, 50)
 
     do_tuning   = st.checkbox("Hyperparameter tuning")
-    do_baselines= st.checkbox("Baselines",   value=True)
-    do_ablation = st.checkbox("Ablation",    value=True)
-    do_stats    = st.checkbox("Stat tests",  value=True)
+    do_baselines= st.checkbox("Baselines",   value=False)  # off by default — slow
+    do_ablation = st.checkbox("Ablation",    value=False)  # off by default — slow
+    do_stats    = st.checkbox("Stat tests",  value=False)  # off by default — slow
     do_multi    = st.checkbox("Multi-repo")
     do_sens     = st.checkbox("Sensitivity")
     do_report   = st.checkbox("HTML report", value=True)
