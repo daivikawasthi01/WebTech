@@ -107,9 +107,9 @@ def main():
             print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
             os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
             result = subprocess.run(
-                ["git", "clone", "--depth=200", clone_url, args.repo],
-                capture_output=True, text=True
-            )
+            ["git", "clone", clone_url, args.repo],
+            capture_output=True, text=True
+        )
             if result.returncode != 0:
                 print(f"[ERROR] Clone failed:\n{result.stderr}")
                 raise RuntimeError(f"Could not clone {clone_url}")
