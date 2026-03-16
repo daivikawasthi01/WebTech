@@ -18,6 +18,7 @@ import os
 import json
 import time
 import argparse
+import subprocess
 
 from src.data_collector    import build_dataset_from_repo
 from src.preprocess        import preprocess_dataset
@@ -96,6 +97,32 @@ def main():
     print("   AUTO-MAINTAINABILITY NEURO-GENETIC FRAMEWORK")
     print("=" * 60)
 
+    # ── Step 0: Clone repo if missing ─────────────────────────────────────────
+REPO_URLS = {
+    "flask":    "https://github.com/pallets/flask.git",
+    "requests": "https://github.com/psf/requests.git",
+    "django":   "https://github.com/django/django.git",
+}
+
+if not os.path.isdir(args.repo):
+    repo_name = os.path.basename(args.repo.rstrip("/"))
+    clone_url = REPO_URLS.get(repo_name)
+    if clone_url:
+        print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
+        os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
+        result = subprocess.run(
+            ["git", "clone", "--depth=200", clone_url, args.repo],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            print(f"[ERROR] Clone failed:\n{result.stderr}")
+            raise RuntimeError(f"Could not clone {clone_url}")
+        print(f"  Cloned successfully.")
+    else:
+        raise ValueError(
+            f"'{args.repo}' does not exist and has no entry in REPO_URLS. "
+            f"Either push the repo to your git history or add it to REPO_URLS."
+        )
     # ── Step 1: Mine ──────────────────────────────────────────────────────────
     if args.force_collect or args.force_all or not os.path.exists(args.raw_file):
         print(f"\n[STEP 1] Mining: {args.repo}")

@@ -92,7 +92,9 @@ with st.sidebar:
     st.title("NeuroGA Config")
     st.markdown("---")
 
-    repo_path  = st.text_input("Repository path", "test_repos/flask")
+    # app.py sidebar
+    repo_path = st.text_input("Repository path", "test_repos/flask",
+                           help="Use test_repos/flask, test_repos/requests, or test_repos/django")
     raw_file   = st.text_input("Raw data file",   "data/flask_dataset.csv")
     clean_file = st.text_input("Clean data file",  "data/flask_dataset_clean.csv")
 
