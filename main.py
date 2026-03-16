@@ -87,10 +87,6 @@ def main():
 
     os.makedirs("data/results", exist_ok=True)
 
-    # FIX 1: t0 is now defined BEFORE Step 1 so that the final
-    # "[DONE] Total time" line at the bottom always has a valid reference.
-    # Previously t0 was set after the Step 1 block, so any early return or
-    # exception before Step 3 caused a NameError on the timing line.
     t0 = time.time()
 
     print("=" * 60)
@@ -98,31 +94,32 @@ def main():
     print("=" * 60)
 
     # ── Step 0: Clone repo if missing ─────────────────────────────────────────
-REPO_URLS = {
-    "flask":    "https://github.com/pallets/flask.git",
-    "requests": "https://github.com/psf/requests.git",
-    "django":   "https://github.com/django/django.git",
-}
+    REPO_URLS = {
+        "flask":    "https://github.com/pallets/flask.git",
+        "requests": "https://github.com/psf/requests.git",
+        "django":   "https://github.com/django/django.git",
+    }
 
-if not os.path.isdir(args.repo):
-    repo_name = os.path.basename(args.repo.rstrip("/"))
-    clone_url = REPO_URLS.get(repo_name)
-    if clone_url:
-        print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
-        os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
-        result = subprocess.run(
-            ["git", "clone", "--depth=200", clone_url, args.repo],
-            capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            print(f"[ERROR] Clone failed:\n{result.stderr}")
-            raise RuntimeError(f"Could not clone {clone_url}")
-        print(f"  Cloned successfully.")
-    else:
-        raise ValueError(
-            f"'{args.repo}' does not exist and has no entry in REPO_URLS. "
-            f"Either push the repo to your git history or add it to REPO_URLS."
-        )
+    if not os.path.isdir(args.repo):
+        repo_name = os.path.basename(args.repo.rstrip("/"))
+        clone_url = REPO_URLS.get(repo_name)
+        if clone_url:
+            print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
+            os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
+            result = subprocess.run(
+                ["git", "clone", "--depth=200", clone_url, args.repo],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                print(f"[ERROR] Clone failed:\n{result.stderr}")
+                raise RuntimeError(f"Could not clone {clone_url}")
+            print("  Cloned successfully.")
+        else:
+            raise ValueError(
+                f"'{args.repo}' does not exist and has no entry in REPO_URLS. "
+                f"Either push the repo or add it to REPO_URLS."
+            )
+
     # ── Step 1: Mine ──────────────────────────────────────────────────────────
     if args.force_collect or args.force_all or not os.path.exists(args.raw_file):
         print(f"\n[STEP 1] Mining: {args.repo}")
@@ -217,9 +214,6 @@ if not os.path.isdir(args.repo):
 
     # ── Step 7: Multi-repo ────────────────────────────────────────────────────
     if args.multi_repo:
-        # FIX 2: Added skip guard for multi-repo consistent with all other stages.
-        # Previously this was the only stage that always re-ran, even with
-        # existing results and without --force-all, wasting significant time.
         MULTI_PATH = "data/results/multi_repo_results.json"
         if os.path.exists(MULTI_PATH) and not (args.force_collect or args.force_all):
             print("\n[STEP 7] Skipping — multi_repo_results.json already exists.")
@@ -242,9 +236,6 @@ if not os.path.isdir(args.repo):
 
     # ── Step 8: Sensitivity ───────────────────────────────────────────────────
     if args.run_sensitivity:
-        # FIX 3: Added skip guard for sensitivity — previously the only stage
-        # (besides multi-repo) that always re-ran. A full 4x4x4 sweep takes
-        # ~20–60 min; skipping when results exist is essential for iterating.
         SENS_PATH = "data/results/sensitivity_results.json"
         if os.path.exists(SENS_PATH) and not (args.force_collect or args.force_all):
             print("\n[STEP 8] Skipping — sensitivity_results.json already exists.")
