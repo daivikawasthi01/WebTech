@@ -181,7 +181,39 @@ with tab1:
         run_res  = st.button("▶ Research Modules",  use_container_width=True)
         run_sens = st.button("▶ Sensitivity Only",  use_container_width=True)
 
-    if run_full or run_ga or run_res or run_sens:
+    # ── Sensitivity Only — runs sensitivity.py directly, skips GA entirely ──
+    if run_sens:
+        if not exists(clean_file):
+            st.error(f"Clean dataset not found: {clean_file}\n"
+                     "Run the full pipeline first to generate it.")
+        else:
+            sens_script = (
+                f"import sys; sys.path.insert(0, '.'); "
+                f"from src.sensitivity import run_sensitivity; "
+                f"run_sensitivity('{clean_file}')"
+            )
+            with st.spinner("Running sensitivity sweep (8 GA runs)…"):
+                try:
+                    result = subprocess.run(
+                        [sys.executable, "-c", sens_script],
+                        capture_output=True, text=True, timeout=600
+                    )
+                except subprocess.TimeoutExpired:
+                    st.error("Sensitivity timed out after 10 minutes.")
+                    st.stop()
+                except Exception as exc:
+                    st.error(f"Failed to launch sensitivity: {exc}")
+                    st.stop()
+            if result.returncode == 0:
+                st.success("Sensitivity complete!")
+                st.rerun()
+            else:
+                st.error("Sensitivity failed.")
+                with st.expander("Error output"):
+                    st.code(result.stderr or result.stdout)
+
+    # ── Full pipeline / GA only / Research modules ─────────────────────────
+    if run_full or run_ga or run_res:
         cmd = [
             sys.executable, "main.py",
             "--repo", repo_path,
@@ -207,10 +239,8 @@ with tab1:
                     cmd += ["--multi-repo", "--repos"] + repos_list
                 else:
                     st.warning("Repos field is empty — multi-repo skipped.")
+            if do_sens:      cmd.append("--run-sensitivity")
             if do_report:    cmd.append("--run-report")
-        # Sensitivity fires for full pipeline, research modules, OR dedicated button
-        if (run_full or run_res or run_sens) and do_sens:
-            cmd.append("--run-sensitivity")
 
         with st.spinner("Running… check terminal for live output."):
             try:
