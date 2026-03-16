@@ -208,7 +208,7 @@ with tab1:
                 "--stagnation",     str(stagnation),
                 "--run-sensitivity",
             ]
-            with st.spinner("Running sensitivity sweep (8 GA runs, ~3 min)…"):
+            with st.spinner("Running sensitivity sweep (4 GA runs, ~2 min)…"):
                 try:
                     _sens_result = subprocess.run(
                         _sens_cmd,
