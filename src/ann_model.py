@@ -27,15 +27,16 @@ Changes in this version:
      to None and only set when mse improves. If predictions are always NaN,
      best_preds stays None and np.maximum(best_preds, 0) raises TypeError.
      Fixed with a zeros fallback.
+
+  8. Lazy torch imports — torch is imported inside each function/class that
+     needs it rather than at module level. This means the dashboard tabs that
+     only display saved results (GA, Baselines, Ablation, etc.) load fine even
+     when torch is not installed. Only the Pipeline tab fails if torch is absent.
 """
 
 import json
 import os
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split, StratifiedKFold
 import pandas as pd
@@ -61,43 +62,82 @@ def load_hyperparams() -> dict:
 # Dataset
 # ---------------------------------------------------------------------------
 
-class MaintainabilityDataset(Dataset):
+class MaintainabilityDataset:
+    """Lazy-import-safe dataset wrapper. Imports torch on first instantiation."""
     def __init__(self, X: np.ndarray, y: np.ndarray):
-        self.X = torch.tensor(X, dtype=torch.float32)
-        self.y = torch.tensor(y, dtype=torch.float32).view(-1, 1)
+        import torch
+        from torch.utils.data import Dataset
+
+        class _TorchDataset(Dataset):
+            def __init__(self, X, y):
+                self.X = torch.tensor(X, dtype=torch.float32)
+                self.y = torch.tensor(y, dtype=torch.float32).view(-1, 1)
+            def __len__(self):
+                return len(self.X)
+            def __getitem__(self, idx):
+                return self.X[idx], self.y[idx]
+
+        self._inner = _TorchDataset(X, y)
 
     def __len__(self):
-        return len(self.X)
+        return len(self._inner)
 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
+        return self._inner[idx]
+
+    # Allow passing directly to DataLoader
+    def __iter__(self):
+        return iter(self._inner)
+
+
+def _make_dataset(X: np.ndarray, y: np.ndarray):
+    """Return a torch Dataset without requiring a top-level torch import."""
+    import torch
+    from torch.utils.data import Dataset
+
+    class _DS(Dataset):
+        def __init__(self, X, y):
+            self.X = torch.tensor(X, dtype=torch.float32)
+            self.y = torch.tensor(y, dtype=torch.float32).view(-1, 1)
+        def __len__(self):
+            return len(self.X)
+        def __getitem__(self, idx):
+            return self.X[idx], self.y[idx]
+
+    return _DS(X, y)
 
 
 # ---------------------------------------------------------------------------
 # Network architecture
 # ---------------------------------------------------------------------------
 
-class MaintainabilityANN(nn.Module):
-    """
-    3-layer feed-forward: Input -> hidden1 -> hidden2 -> 1.
-    Sizes are tunable via tune.py / Optuna.
-    Dropout after each hidden layer.
-    """
-    def __init__(self, input_dim: int, hidden1: int = 32, hidden2: int = 16,
-                 dropout: float = 0.3):
-        super().__init__()
-        self.layer1       = nn.Linear(input_dim, hidden1)
-        self.relu1        = nn.ReLU()
-        self.dropout1     = nn.Dropout(dropout)
-        self.layer2       = nn.Linear(hidden1, hidden2)
-        self.relu2        = nn.ReLU()
-        self.dropout2     = nn.Dropout(dropout)
-        self.output_layer = nn.Linear(hidden2, 1)
+def _make_model(input_dim: int, hidden1: int = 32, hidden2: int = 16,
+                dropout: float = 0.3):
+    """Build and return the ANN. Imports torch lazily."""
+    import torch.nn as nn
 
-    def forward(self, x):
-        out = self.dropout1(self.relu1(self.layer1(x)))
-        out = self.dropout2(self.relu2(self.layer2(out)))
-        return self.output_layer(out)
+    class MaintainabilityANN(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.layer1       = nn.Linear(input_dim, hidden1)
+            self.relu1        = nn.ReLU()
+            self.dropout1     = nn.Dropout(dropout)
+            self.layer2       = nn.Linear(hidden1, hidden2)
+            self.relu2        = nn.ReLU()
+            self.dropout2     = nn.Dropout(dropout)
+            self.output_layer = nn.Linear(hidden2, 1)
+
+        def forward(self, x):
+            out = self.dropout1(self.relu1(self.layer1(x)))
+            out = self.dropout2(self.relu2(self.layer2(out)))
+            return self.output_layer(out)
+
+    return MaintainabilityANN()
+
+
+# Keep the class name accessible for any code that imports it directly
+def MaintainabilityANN(input_dim, hidden1=32, hidden2=16, dropout=0.3):
+    return _make_model(input_dim, hidden1, hidden2, dropout)
 
 
 # ---------------------------------------------------------------------------
@@ -116,9 +156,14 @@ def _train_fold(
     If log_transform=True, predictions are back-transformed with expm1 before MSE.
     Returns validation MSE on original scale.
     """
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torch.utils.data import DataLoader
+
     input_dim = X_train.shape[1]
-    model     = MaintainabilityANN(input_dim, hidden1=hidden1, hidden2=hidden2,
-                                   dropout=dropout)
+    model     = _make_model(input_dim, hidden1=hidden1, hidden2=hidden2,
+                             dropout=dropout)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -126,11 +171,11 @@ def _train_fold(
     )
 
     train_loader = DataLoader(
-        MaintainabilityDataset(X_train, y_train_transformed),
+        _make_dataset(X_train, y_train_transformed),
         batch_size=batch_size, shuffle=True
     )
     val_loader = DataLoader(
-        MaintainabilityDataset(X_val, y_val_original),
+        _make_dataset(X_val, y_val_original),
         batch_size=batch_size, shuffle=False
     )
 
@@ -213,9 +258,6 @@ def train_and_evaluate_ann(
     if use_kfold:
         y_bins = np.clip(y_all.astype(int), 0, 2)
 
-        # FIX: StratifiedKFold raises ValueError when any class has fewer
-        # samples than n_splits (common on small repos with zero-inflated bug
-        # counts).  Clamp n_folds to the minimum class count, floor at 2.
         min_class_count = int(np.bincount(y_bins).min())
         n_folds_safe    = max(2, min(n_folds, len(X_all), min_class_count))
         if n_folds_safe < n_folds:
@@ -280,6 +322,11 @@ def get_predictions(
     Returns: (file_names, y_true, y_pred, mse)
     Used by the Streamlit dashboard to display per-file risk scores.
     """
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torch.utils.data import DataLoader
+
     hp = load_hyperparams()
     if hyperparams:
         hp.update(hyperparams)
@@ -307,17 +354,15 @@ def get_predictions(
     X_tr   = scaler.fit_transform(X_tr)
     X_va   = scaler.transform(X_va)
 
-    model     = MaintainabilityANN(X_tr.shape[1], hp['hidden1'], hp['hidden2'],
-                                   hp['dropout'])
+    model     = _make_model(X_tr.shape[1], hp['hidden1'], hp['hidden2'], hp['dropout'])
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=hp['lr'],
                            weight_decay=hp['weight_decay'])
-    # FIX: removed verbose=False — kwarg was dropped in PyTorch 2.2, raises TypeError.
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.5, patience=5
     )
     train_loader = DataLoader(
-        MaintainabilityDataset(X_tr, y_tr_m),
+        _make_dataset(X_tr, y_tr_m),
         batch_size=hp['batch_size'], shuffle=True
     )
 
@@ -348,8 +393,6 @@ def get_predictions(
             if no_imp >= 15:
                 break
 
-    # FIX: best_preds stays None if every epoch produced NaN predictions
-    # (bad data / extreme LR). np.maximum(None, 0) raises TypeError.
     if best_preds is None:
         best_preds = np.zeros_like(y_va_orig)
 
