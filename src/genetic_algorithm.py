@@ -152,7 +152,7 @@ class FeatureSelectionGA:
         mse = train_and_evaluate_ann(
             self.csv_file,
             feature_mask  = list(chromosome),
-            epochs        = 30,       # reduced from 50 for cloud speed
+            epochs        = 20,       # reduced from 50 for cloud speed
             batch_size    = 16,
             use_kfold     = False,    # fast single split during evolution
             log_transform = self.log_transform,
