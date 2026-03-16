@@ -10,10 +10,6 @@ from dateutil.relativedelta import relativedelta
 
 
 def collect_structural_metrics(code):
-    """
-    Extract Category A metrics: Cyclomatic Complexity, Halstead, DIT, WMC,
-    nesting_depth, class_coupling.
-    """
     if not code:
         return {}
 
@@ -85,10 +81,6 @@ def collect_structural_metrics(code):
 
 
 def collect_textual_metrics(code):
-    """
-    Extract Category B metrics: Readability, Comments, Docstrings, Whitespace,
-    code_duplication_pct.
-    """
     if not code:
         return {}
 
@@ -134,18 +126,20 @@ def collect_textual_metrics(code):
 
 def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_months=3):
     """
-    Extract Category C metrics and Target Ground Truth (Bug-Proneness Score).
+    Extract Category C metrics and target ground truth (bug-proneness score).
 
-    timeframe_months reduced from 6 -> 3 so shallow/recent clones have enough
-    history to produce past_commits.
+    commit.stats.total intentionally removed — it runs git diff on every commit
+    and hangs on cloud deployments with large repos. added_deleted_ratio is set
+    to a neutral constant (1.0) instead. It has also been removed from
+    constants.CATEGORY_C_EVOLUTIONARY so the GA does not waste a chromosome bit
+    on a constant feature.
 
-    Fallback: if no commits fall before the snapshot date (shallow clone or very
-    new file), all available commits are used as past_commits so the file is not
-    silently dropped from the dataset.
+    timeframe_months defaults to 3 (was 6) so shallow/recent clones have enough
+    history. If no commits pre-date the snapshot, all available commits are used
+    as past_commits so the file is not silently dropped.
 
-    Tree path lookup: tries direct key access first, then walks the tree segment
-    by segment to handle nested paths that GitPython sometimes fails to resolve
-    with a single bracket lookup.
+    Tree path lookup walks segments as a fallback for nested paths that GitPython
+    sometimes fails to resolve with a single bracket access.
     """
     try:
         repo = git.Repo(repo_path)
@@ -171,8 +165,7 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         else:
             future_commits.append(c)
 
-    # FIX: if no commits pre-date the snapshot (shallow clone or very new file),
-    # fall back to treating all available commits as past so the file is kept.
+    # If no commits pre-date the snapshot, fall back to all available commits.
     if not past_commits and commits_touching_file:
         past_commits   = commits_touching_file
         future_commits = []
@@ -182,26 +175,18 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
 
     past_authors   = set()
     past_bug_fixes = 0
-    total_added    = 0
-    total_deleted  = 0
     bug_keywords   = ['fix', 'bug', 'patch', 'issue', 'resolve', 'error']
 
     for commit in past_commits:
         past_authors.add(commit.author.email)
-        message = commit.message.lower()
-        if any(keyword in message for keyword in bug_keywords):
-            past_bug_fixes += 1
-        try:
-            stats          = commit.stats.total
-            total_added   += stats.get('insertions', 0)
-            total_deleted += stats.get('deletions',  0)
-        except Exception:
-            pass
-
-    target_bug_fixes = 0
-    for commit in future_commits:
         if any(kw in commit.message.lower() for kw in bug_keywords):
-            target_bug_fixes += 1
+            past_bug_fixes += 1
+        # commit.stats.total intentionally omitted — too slow on cloud
+
+    target_bug_fixes = sum(
+        1 for c in future_commits
+        if any(kw in c.message.lower() for kw in bug_keywords)
+    )
 
     try:
         code_age_days = (
@@ -212,17 +197,16 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         code_age_days = 0
 
     metrics = {
-        'commit_frequency':    len(past_commits),
-        'author_count':        len(past_authors),
-        'bug_fix_ratio':       past_bug_fixes / max(1, len(past_commits)),
-        'code_age_days':       code_age_days,
-        'added_deleted_ratio': total_added / max(1, total_deleted),
+        'commit_frequency':     len(past_commits),
+        'author_count':         len(past_authors),
+        'bug_fix_ratio':        past_bug_fixes / max(1, len(past_commits)),
+        'code_age_days':        code_age_days,
+        # added_deleted_ratio removed (required commit.stats.total, too slow)
         'target_bug_proneness': target_bug_fixes,
     }
 
-    # Retrieve the file's code as it existed at the snapshot date.
-    # FIX: try direct key lookup first, then walk path segments — GitPython
-    # sometimes fails to resolve nested paths with a single bracket access.
+    # Retrieve file content at snapshot date.
+    # Tries direct key lookup first, then walks path segments as a fallback.
     historical_code  = None
     last_past_commit = past_commits[0]
 
@@ -242,9 +226,6 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
 
 
 def extract_all_metrics_for_file(repo_path, file_rel_path):
-    """
-    Combines all metrics for a single file into a single feature vector.
-    """
     evolutionary_metrics, historical_code = collect_evolutionary_metrics_and_target(
         repo_path, file_rel_path
     )
@@ -280,7 +261,6 @@ def build_dataset_from_repo(repo_path, output_csv_path):
     df = pd.DataFrame(dataset)
 
     if df.empty or 'file_name' not in df.columns:
-        # Count raw .py files so the error message is more informative
         py_count = sum(
             1 for root, _, files in os.walk(repo_path)
             if '.git' not in root and '__pycache__' not in root
@@ -288,8 +268,7 @@ def build_dataset_from_repo(repo_path, output_csv_path):
         )
         print(
             f"[WARN] No valid Python files extracted from '{repo_path}'. "
-            f"({py_count} .py files found by os.walk — all returned empty features.) "
-            "Check that the repo has enough git history for the snapshot window."
+            f"({py_count} .py files found by os.walk — all returned empty features.)"
         )
         raise ValueError(f"No Python files found under '{repo_path}'.")
 
@@ -303,6 +282,4 @@ def build_dataset_from_repo(repo_path, output_csv_path):
 
 
 if __name__ == "__main__":
-    repo_directory = "test_repos/flask"
-    output_file    = "flask_dataset.csv"
-    build_dataset_from_repo(repo_directory, output_file)
+    build_dataset_from_repo("test_repos/flask", "flask_dataset.csv")
