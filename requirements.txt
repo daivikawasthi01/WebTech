@@ -1,6 +1,16 @@
 pandas
 numpy
 scikit-learn
-tensorflow
+torch
 GitPython
 radon
+python-dateutil
+scipy
+streamlit
+plotly
+optuna
+jupyter
+matplotlib
+seaborn
+tqdm
+xgboost
