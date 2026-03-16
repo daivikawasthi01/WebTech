@@ -17,7 +17,7 @@ import time
 
 
 _SENSITIVITY_GA_DEFAULTS = dict(
-    generations       = 2,  # 2 gens: 4runs x 2gens x 8pop = ~64 ANN trains
+    generations       = 1,  # 2 gens: 4runs x 2gens x 8pop = ~64 ANN trains
     mutation_rate     = 0.20,
     min_mutation_rate = 0.03,
     stagnation_limit  = 3,
