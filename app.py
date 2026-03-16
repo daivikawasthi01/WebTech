@@ -74,8 +74,12 @@ GRID_COLOR = "rgba(255,255,255,0.1)"
 
 def load(path):
     if os.path.exists(path):
-        with open(path) as f:
-            return json.load(f)
+        try:
+            with open(path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, ValueError):
+            # Partial write during a pipeline crash — treat as missing
+            return None
     return None
 
 
@@ -217,6 +221,9 @@ with tab1:
                          "Try reducing population size or generations, "
                          "or disable research modules.")
                 st.stop()
+            except Exception as exc:
+                st.error(f"Failed to launch pipeline: {exc}")
+                st.stop()
 
         if result.returncode == 0:
             st.success("Done!")
@@ -245,10 +252,12 @@ with tab2:
         st.info("Run the GA first (Pipeline tab).")
     else:
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Best MSE",        f"{ga['best_mse']:.4f}")
-        c2.metric("Best Fitness",    f"{ga['best_fitness']:.4f}")
-        c3.metric("Features",        f"{ga['n_selected']}/{ga['n_total']}")
-        c4.metric("Reduction",       f"{(1 - ga['n_selected']/ga['n_total'])*100:.0f}%")
+        n_sel   = ga.get('n_selected', 0)
+        n_tot   = ga.get('n_total', 1) or 1  # guard zero-division
+        c1.metric("Best MSE",    f"{ga.get('best_mse', float('nan')):.4f}")
+        c2.metric("Best Fitness",f"{ga.get('best_fitness', float('nan')):.4f}")
+        c3.metric("Features",    f"{n_sel}/{n_tot}")
+        c4.metric("Reduction",   f"{(1 - n_sel/n_tot)*100:.0f}%")
 
         st.divider()
         left, right = st.columns([3, 2])
@@ -382,10 +391,14 @@ with tab3:
 
         stats = load(STATS_PATH)
         if stats:
-            sig = "Significant" if stats["significant"] else "Not significant"
-            st.info(f"**{sig}** — Wilcoxon p={stats['wilcoxon_p_value']:.4f} | "
-                    f"Cohen's d={stats['cohens_d']:.3f} ({stats['effect_size']}) | "
-                    f"Improvement: {stats['pct_improvement']:+.1f}%")
+            sig = "Significant" if stats.get("significant") else "Not significant"
+            p   = stats.get("wilcoxon_p_value", float("nan"))
+            d   = stats.get("cohens_d",         float("nan"))
+            eff = stats.get("effect_size",       "?")
+            pct = stats.get("pct_improvement",   float("nan"))
+            st.info(f"**{sig}** — Wilcoxon p={p:.4f} | "
+                    f"Cohen's d={d:.3f} ({eff}) | "
+                    f"Improvement: {pct:+.1f}%")
 
 
 # Ablation tab
@@ -397,9 +410,13 @@ with tab4:
         st.info("Enable Ablation in the Pipeline tab and run.")
     else:
         df_abl = pd.DataFrame([
-            {"Combination": k, "Categories": " + ".join(v["categories"]),
-             "Features": v["n_features"], "Mean MSE": v["mean"], "Std": v["std"]}
+            {"Combination": k,
+             "Categories": " + ".join(v.get("categories", [])),
+             "Features":   v.get("n_features", "?"),
+             "Mean MSE":   v.get("mean", float("nan")),
+             "Std":        v.get("std",  0.0)}
             for k, v in abl.items()
+            if isinstance(v, dict)
         ]).sort_values("Mean MSE")
 
         bar_color_map = {
@@ -428,8 +445,11 @@ with tab4:
 
         best  = df_abl.iloc[0]
         worst = df_abl.iloc[-1]
-        st.success(f"Best:  {best['Combination']} (MSE = {best['Mean MSE']:.4f})")
-        st.warning(f"Worst: {worst['Combination']} (MSE = {worst['Mean MSE']:.4f})")
+        try:
+            st.success(f"Best:  {best['Combination']} (MSE = {float(best['Mean MSE']):.4f})")
+            st.warning(f"Worst: {worst['Combination']} (MSE = {float(worst['Mean MSE']):.4f})")
+        except (ValueError, TypeError):
+            pass
 
         a_only = abl.get("A only (Structural)", {}).get("mean")
         abc    = abl.get("A + B + C (Full)",    {}).get("mean")
@@ -461,7 +481,7 @@ with tab5:
                         "Risk Level":     pd.cut(
                             y_pred, bins=[-0.1, 0.5, 2.0, 1e9],
                             labels=["Low", "Medium", "High"],
-                        ).astype(str),
+                        ).astype(str).replace("nan", "Low"),
                     }).sort_values("Predicted Score", ascending=False)
 
                     st.session_state["df_risk"] = df_risk
@@ -528,15 +548,17 @@ with tab6:
 
         cols = st.columns(len(repos))
         for col, (repo, data) in zip(cols, mr.items()):
+            _mse = data.get('ga_ann_mse', data.get('ga_best_mse', float('nan')))
+            _sel = data.get('n_selected', '?')
+            _tot = data.get('n_features_total', '?')
             col.metric(repo.capitalize(),
-                       f"MSE {data.get('ga_ann_mse', data['ga_best_mse']):.4f}",
-                       delta=f"{data['n_selected']}/{data['n_features_total']} feats",
-                       delta_color="off")
+                       f"MSE {_mse:.4f}" if _mse == _mse else "MSE —",
+                       delta=f"{_sel}/{_tot} feats", delta_color="off")
 
         left, right = st.columns([3, 2])
 
         with left:
-            ga_mses  = [r.get("ga_ann_mse", r["ga_best_mse"]) for r in mr.values()]
+            ga_mses  = [r.get("ga_ann_mse", r.get("ga_best_mse", float("nan"))) for r in mr.values()]
             all_mses = [r.get("all_features_mse", float("nan"))  for r in mr.values()]
             fig = go.Figure()
             fig.add_trace(go.Bar(name="All Features", x=repos, y=all_mses,
@@ -564,11 +586,11 @@ with tab6:
 
         rows = [
             {"Repository": repo,
-             "Files":       r["n_files"],
-             "Total Feats": r["n_features_total"],
-             "Selected":    r["n_selected"],
+             "Files":       r.get("n_files", "?"),
+             "Total Feats": r.get("n_features_total", "?"),
+             "Selected":    r.get("n_selected", "?"),
              "Reduction":   f"{r.get('reduction_pct', 0)}%",
-             "GA MSE":      f"{r.get('ga_ann_mse', r['ga_best_mse']):.4f}",
+             "GA MSE":      f"{r.get('ga_ann_mse', r.get('ga_best_mse', float('nan'))):.4f}",
              "All-Feat MSE":f"{r.get('all_features_mse', float('nan')):.4f}",
              "Improvement": f"{r.get('improvement_pct', float('nan')):+.1f}%",
              "Time (s)":    r.get("elapsed_s", "—")}
