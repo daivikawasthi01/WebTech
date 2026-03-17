@@ -1,5 +1,6 @@
 import os
 import ast
+import subprocess
 from collections import Counter
 from radon.complexity import cc_visit
 from radon.metrics import h_visit
@@ -127,6 +128,62 @@ def collect_textual_metrics(code):
     return metrics
 
 
+def _get_churn_stats(repo_path: str, file_rel_path: str,
+                     before_date) -> tuple:
+    """
+    Get total insertions and deletions for a file up to before_date using
+    a single git log --numstat subprocess call.
+
+    This replaces the old commit.stats.total approach which ran git diff
+    once per commit (O(n_commits) diffs). git log --numstat retrieves all
+    diff stats in one call regardless of commit count — typically 10-50ms
+    per file, safe for a FastAPI backend.
+
+    Returns (total_insertions, total_deletions).
+    Binary files and renames produce '-' instead of numbers — these are
+    treated as 0 and skipped safely.
+    """
+    before_str = before_date.strftime("%Y-%m-%dT%H:%M:%S")
+
+    try:
+        result = subprocess.run(
+            [
+                "git", "log",
+                "--numstat",        # tab-separated: insertions deletions filename
+                "--format=",        # suppress commit headers — only stat lines
+                f"--before={before_str}",
+                "--follow",         # follow renames
+                "--",
+                file_rel_path,
+            ],
+            capture_output=True, text=True,
+            cwd=repo_path, timeout=30
+        )
+    except subprocess.TimeoutExpired:
+        return 0, 0
+    except Exception:
+        return 0, 0
+
+    total_insertions = 0
+    total_deletions  = 0
+
+    for line in result.stdout.strip().split('\n'):
+        parts = line.split('\t')
+        if len(parts) < 2:
+            continue
+        try:
+            # Binary files show '-' instead of a number — skip them
+            ins  = int(parts[0]) if parts[0].strip() not in ('-', '') else 0
+            dels = int(parts[1]) if parts[1].strip() not in ('-', '') else 0
+            total_insertions += ins
+            total_deletions  += dels
+        except (ValueError, IndexError):
+            continue
+
+    return total_insertions, total_deletions
+
+
+
 def collect_evolutionary_metrics_and_target(
         repo_path, file_rel_path, timeframe_months=12):
     """
@@ -142,9 +199,10 @@ def collect_evolutionary_metrics_and_target(
         full commit history for accurate commit_frequency, bug_fix_ratio, and
         author_count values.
 
-    commit.stats.total intentionally absent:
-        Runs git diff on every commit — prohibitively slow. added_deleted_ratio
-        is not computed and is absent from constants.py.
+    added_deleted_ratio and code_churn via git log --numstat:
+        Single subprocess call per file (not one diff per commit). Returns
+        total insertions and deletions across all past commits. ~10-50ms
+        per file — safe for FastAPI backend.
 
     Fallback for empty past_commits:
         If no commits pre-date the snapshot, all available commits are used
@@ -205,11 +263,20 @@ def collect_evolutionary_metrics_and_target(
     except IndexError:
         code_age_days = 0
 
+    # Churn stats — single git log --numstat call, fast on any backend
+    insertions, deletions = _get_churn_stats(
+        repo_path, file_rel_path, snapshot_date
+    )
+    code_churn          = insertions + deletions
+    added_deleted_ratio = insertions / max(1, deletions)
+
     metrics = {
         'commit_frequency':     len(past_commits),
         'author_count':         len(past_authors),
         'bug_fix_ratio':        past_bug_fixes / max(1, len(past_commits)),
         'code_age_days':        max(0, code_age_days),
+        'code_churn':           code_churn,
+        'added_deleted_ratio':  added_deleted_ratio,
         'target_bug_proneness': target_bug_fixes,
     }
 

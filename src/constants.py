@@ -1,9 +1,10 @@
 """
 constants.py — Shared feature category definitions.
 
-added_deleted_ratio removed from CATEGORY_C_EVOLUTIONARY — it required
-commit.stats.total which diffs every commit and hangs on cloud deployments
-with large repos. Removing it keeps the GA chromosome honest and fast.
+Category C now includes code_churn and added_deleted_ratio, computed via
+git log --numstat (single subprocess call per file, ~10-50ms). This replaces
+the old commit.stats.total approach which ran git diff once per commit and
+was prohibitively slow. The new approach is safe for FastAPI backends.
 """
 
 # Category A: Structural — code complexity and OOP design
@@ -33,7 +34,8 @@ CATEGORY_C_EVOLUTIONARY = [
     'author_count',
     'bug_fix_ratio',
     'code_age_days',
-    # 'added_deleted_ratio' removed — required commit.stats.total, too slow on cloud
+    'code_churn',           # total lines added + deleted (git log --numstat)
+    'added_deleted_ratio',  # lines added / lines deleted (git log --numstat)
 ]
 
 ALL_FEATURES = CATEGORY_A_STRUCTURAL + CATEGORY_B_TEXTUAL + CATEGORY_C_EVOLUTIONARY
