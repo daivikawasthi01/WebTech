@@ -49,11 +49,13 @@ def collect_structural_metrics(code):
             * metrics.get('avg_cyclomatic_complexity', 1)
         )
 
-        _NESTING_TYPES = (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.ExceptHandler)
+        _NESTING_TYPES = (ast.If, ast.For, ast.While, ast.With, ast.Try,
+                          ast.ExceptHandler)
 
         def _max_nesting(node, depth=0):
             child_depths = [
-                _max_nesting(child, depth + (1 if isinstance(child, _NESTING_TYPES) else 0))
+                _max_nesting(child,
+                             depth + (1 if isinstance(child, _NESTING_TYPES) else 0))
                 for child in ast.iter_child_nodes(node)
             ]
             return max(child_depths) if child_depths else depth
@@ -104,7 +106,8 @@ def collect_textual_metrics(code):
             [node.id for node in ast.walk(tree) if isinstance(node, ast.Name)]
             + [
                 node.name for node in ast.walk(tree)
-                if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef))
+                if isinstance(node, (ast.FunctionDef, ast.ClassDef,
+                                     ast.AsyncFunctionDef))
             ]
         )
         metrics['avg_identifier_length'] = (
@@ -124,22 +127,28 @@ def collect_textual_metrics(code):
     return metrics
 
 
-def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_months=3):
+def collect_evolutionary_metrics_and_target(
+        repo_path, file_rel_path, timeframe_months=12):
     """
     Extract Category C metrics and target ground truth (bug-proneness score).
 
-    commit.stats.total intentionally removed — it runs git diff on every commit
-    and hangs on cloud deployments with large repos. added_deleted_ratio is set
-    to a neutral constant (1.0) instead. It has also been removed from
-    constants.CATEGORY_C_EVOLUTIONARY so the GA does not waste a chromosome bit
-    on a constant feature.
+    timeframe_months=12 (production default):
+        12 months gives far more bug-fix commits in the target window and
+        richer evolutionary metric history. The cloud deployment used 3 months
+        to avoid timeouts on fresh shallow clones.
 
-    timeframe_months defaults to 3 (was 6) so shallow/recent clones have enough
-    history. If no commits pre-date the snapshot, all available commits are used
-    as past_commits so the file is not silently dropped.
+    No max_count cap on iter_commits:
+        The max_count=100 limit was a cloud workaround. Locally we walk the
+        full commit history for accurate commit_frequency, bug_fix_ratio, and
+        author_count values.
 
-    Tree path lookup walks segments as a fallback for nested paths that GitPython
-    sometimes fails to resolve with a single bracket access.
+    commit.stats.total intentionally absent:
+        Runs git diff on every commit — prohibitively slow. added_deleted_ratio
+        is not computed and is absent from constants.py.
+
+    Fallback for empty past_commits:
+        If no commits pre-date the snapshot, all available commits are used
+        so the file is not silently dropped from the dataset.
     """
     try:
         repo = git.Repo(repo_path)
@@ -147,7 +156,8 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         print(f"Not a valid git repository: {repo_path}")
         return {}, None
 
-    commits_touching_file = list(repo.iter_commits(paths=file_rel_path, max_count=100))  # max_count caps commit walk — 80% faster on large repos
+    # Full commit history — no cap (max_count=100 was a cloud workaround)
+    commits_touching_file = list(repo.iter_commits(paths=file_rel_path))
 
     if not commits_touching_file:
         return {}, None
@@ -165,7 +175,7 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         else:
             future_commits.append(c)
 
-    # If no commits pre-date the snapshot, fall back to all available commits.
+    # Fallback: if no commits pre-date the snapshot use all available commits
     if not past_commits and commits_touching_file:
         past_commits   = commits_touching_file
         future_commits = []
@@ -181,7 +191,6 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         past_authors.add(commit.author.email)
         if any(kw in commit.message.lower() for kw in bug_keywords):
             past_bug_fixes += 1
-        # commit.stats.total intentionally omitted — too slow on cloud
 
     target_bug_fixes = sum(
         1 for c in future_commits
@@ -200,13 +209,11 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
         'commit_frequency':     len(past_commits),
         'author_count':         len(past_authors),
         'bug_fix_ratio':        past_bug_fixes / max(1, len(past_commits)),
-        'code_age_days':        code_age_days,
-        # added_deleted_ratio removed (required commit.stats.total, too slow)
+        'code_age_days':        max(0, code_age_days),
         'target_bug_proneness': target_bug_fixes,
     }
 
-    # Retrieve file content at snapshot date.
-    # Tries direct key lookup first, then walks path segments as a fallback.
+    # Retrieve file content at snapshot date
     historical_code  = None
     last_past_commit = past_commits[0]
 
@@ -225,9 +232,10 @@ def collect_evolutionary_metrics_and_target(repo_path, file_rel_path, timeframe_
     return metrics, historical_code
 
 
-def extract_all_metrics_for_file(repo_path, file_rel_path):
+def extract_all_metrics_for_file(repo_path, file_rel_path,
+                                 timeframe_months=12):
     evolutionary_metrics, historical_code = collect_evolutionary_metrics_and_target(
-        repo_path, file_rel_path
+        repo_path, file_rel_path, timeframe_months=timeframe_months
     )
 
     if historical_code is None:
@@ -239,47 +247,70 @@ def extract_all_metrics_for_file(repo_path, file_rel_path):
     return {**structural, **textual, **evolutionary_metrics}
 
 
-def build_dataset_from_repo(repo_path, output_csv_path):
-    print(f"Scanning repository at {repo_path}...")
+def build_dataset_from_repo(repo_path, output_csv_path,
+                            timeframe_months=12):
+    """
+    Mine all Python files in repo_path and write a CSV to output_csv_path.
+
+    timeframe_months (default 12):
+        Production default. Controls snapshot lookback window.
+        Cloud deployment used 3 months to avoid timeouts.
+    """
+    print(f"\nScanning repository: {repo_path}")
+    print(f"Snapshot window: {timeframe_months} months back")
     dataset = []
 
+    py_files = []
     for root, _, files in os.walk(repo_path):
         if '.git' in root or '__pycache__' in root or 'venv' in root:
             continue
-
         for file in files:
             if file.endswith('.py'):
-                abs_path      = os.path.join(root, file)
-                file_rel_path = os.path.relpath(abs_path, repo_path).replace('\\', '/')
+                py_files.append(os.path.join(root, file))
 
-                features = extract_all_metrics_for_file(repo_path, file_rel_path)
+    print(f"Found {len(py_files)} Python files. Mining (this takes a while "
+          f"on large repos)...")
 
-                if features:
-                    features['file_name'] = file_rel_path
-                    dataset.append(features)
+    for i, abs_path in enumerate(py_files, 1):
+        file_rel_path = os.path.relpath(abs_path, repo_path).replace('\\', '/')
+
+        if i % 50 == 0 or i == len(py_files):
+            print(f"  [{i:4d}/{len(py_files)}] {file_rel_path}")
+
+        features = extract_all_metrics_for_file(
+            repo_path, file_rel_path,
+            timeframe_months=timeframe_months
+        )
+
+        if features:
+            features['file_name'] = file_rel_path
+            dataset.append(features)
 
     df = pd.DataFrame(dataset)
 
     if df.empty or 'file_name' not in df.columns:
-        py_count = sum(
-            1 for root, _, files in os.walk(repo_path)
-            if '.git' not in root and '__pycache__' not in root
-            for f in files if f.endswith('.py')
+        raise ValueError(
+            f"No valid Python files extracted from '{repo_path}'. "
+            f"({len(py_files)} .py files found — all returned empty features.) "
+            "Check that the repo has enough commit history."
         )
-        print(
-            f"[WARN] No valid Python files extracted from '{repo_path}'. "
-            f"({py_count} .py files found by os.walk — all returned empty features.)"
-        )
-        raise ValueError(f"No Python files found under '{repo_path}'.")
 
     cols = ['file_name'] + [c for c in df.columns if c != 'file_name']
     df   = df[cols]
 
+    os.makedirs(os.path.dirname(output_csv_path) or '.', exist_ok=True)
     df.to_csv(output_csv_path, index=False)
-    print(f"\nSuccess! Dataset generated with {len(df)} valid Python files.")
-    print(f"Saved to: {output_csv_path}")
+
+    bug_prone = (df['target_bug_proneness'] > 0).sum()
+    print(f"\nDataset saved: {len(df)} files | "
+          f"{bug_prone} bug-prone ({bug_prone/len(df)*100:.1f}%) | "
+          f"→ {output_csv_path}")
     return df
 
 
 if __name__ == "__main__":
-    build_dataset_from_repo("test_repos/flask", "flask_dataset.csv")
+    build_dataset_from_repo(
+        "test_repos/flask",
+        "data/flask_dataset.csv",
+        timeframe_months=12
+    )

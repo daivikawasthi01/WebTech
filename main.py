@@ -1,18 +1,28 @@
 """
 main.py — CLI orchestrator for the Hybrid Neuro-Genetic Maintainability Framework.
 
+Production version — local runs without cloud constraints.
+Changes from cloud version:
+  - GA defaults: pop=20, gen=30, stagnation=8, n-trials=30
+  - Added --timeframe-months (passes through to data_collector)
+  - Added --skip-ga flag to mine only, enabling combine_datasets.py workflow
+  - Added --n-epochs and --no-kfold for GA fitness evaluation control
+  - Expanded REPO_URLS with more open-source Python repos
+  - Removed 300s clone timeout (cloud workaround)
+  - Combined dataset workflow documented in help strings
+
 Pipeline stages:
-  0   Auto-clone target repo if missing                     (subprocess git clone)
-  1   Mine Git + AST metrics from the target repository     (data_collector)
-  2   Clean and clip outliers; save unscaled CSV            (preprocess)
-  2.5 Optional Optuna ANN hyperparameter tuning             (tune)        [--run-tuning]
-  3   Run GA to evolve the optimal feature subset           (genetic_algorithm)
-  4   Baseline comparison: GA vs All-Features vs Random     (baseline)    [--run-baselines]
-  5   Ablation study: contribution of each metric category  (ablation)    [--run-ablation]
-  6   Statistical significance test: Wilcoxon + Cohen's d   (stats)       [--run-stats]
-  7   Multi-repo generalisation                             (multi_repo)  [--multi-repo]
-  8   Hyperparameter sensitivity sweep                      (sensitivity) [--run-sensitivity]
-  9   Standalone HTML report                                (report)      [--run-report]
+  0   Auto-clone target repo if missing
+  1   Mine Git + AST metrics                    (data_collector)
+  2   Clean and clip outliers                   (preprocess)
+  2.5 Optional Optuna ANN hyperparameter tuning (tune)        [--run-tuning]
+  3   GA feature selection                      (genetic_algorithm)
+  4   Baseline comparison                       (baseline)    [--run-baselines]
+  5   Ablation study                            (ablation)    [--run-ablation]
+  6   Statistical significance tests            (stats)       [--run-stats]
+  7   Multi-repo generalisation                 (multi_repo)  [--multi-repo]
+  8   Hyperparameter sensitivity sweep          (sensitivity) [--run-sensitivity]
+  9   Standalone HTML report                    (report)      [--run-report]
 """
 
 import os
@@ -27,26 +37,83 @@ from src.preprocess        import preprocess_dataset
 from src.genetic_algorithm import FeatureSelectionGA
 
 
+# Repos that can be auto-cloned by name
+REPO_URLS = {
+    "flask":    "https://github.com/pallets/flask.git",
+    "requests": "https://github.com/psf/requests.git",
+    "django":   "https://github.com/django/django.git",
+    "click":    "https://github.com/pallets/click.git",
+    "httpx":    "https://github.com/encode/httpx.git",
+    "fastapi":  "https://github.com/tiangolo/fastapi.git",
+    "rich":     "https://github.com/Textualize/rich.git",
+    "black":    "https://github.com/psf/black.git",
+    "pytest":   "https://github.com/pytest-dev/pytest.git",
+    "pydantic": "https://github.com/pydantic/pydantic.git",
+}
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Auto-Maintainability Neuro-Genetic Framework"
+        description="Auto-Maintainability Neuro-Genetic Framework — Production",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Mine one repo
+  python main.py --repo test_repos/flask --raw-file data/flask_dataset.csv --skip-ga
+
+  # Mine multiple repos, then combine, then run GA on combined dataset
+  python main.py --repo test_repos/flask    --raw-file data/flask_dataset.csv    --skip-ga
+  python main.py --repo test_repos/requests --raw-file data/requests_dataset.csv --skip-ga
+  python combine_datasets.py
+  python main.py --raw-file data/combined_dataset.csv \\
+                 --processed-file data/combined_dataset_clean.csv \\
+                 --pop-size 20 --generations 30 --run-all
+
+  # Full pipeline on one repo
+  python main.py --repo test_repos/flask --run-all
+        """
     )
 
     # ── Data paths ────────────────────────────────────────────────────────────
-    parser.add_argument("--repo",           type=str, default="test_repos/flask")
-    parser.add_argument("--raw-file",       type=str, default="data/flask_dataset.csv")
-    parser.add_argument("--processed-file", type=str, default="data/flask_dataset_clean.csv")
+    parser.add_argument("--repo",            type=str,
+                        default="test_repos/flask",
+                        help="Path to the Git repository to analyse")
+    parser.add_argument("--raw-file",        type=str,
+                        default="data/flask_dataset.csv",
+                        help="Output path for mined raw CSV")
+    parser.add_argument("--processed-file",  type=str,
+                        default="data/flask_dataset_clean.csv",
+                        help="Output path for cleaned CSV")
+
+    # ── Mining ────────────────────────────────────────────────────────────────
+    parser.add_argument("--timeframe-months", type=int, default=12,
+                        help="Snapshot lookback window in months (default 12). "
+                             "Cloud version used 3.")
+    parser.add_argument("--skip-ga",          action="store_true",
+                        help="Mine and clean only — skip GA and all research "
+                             "modules. Use when mining multiple repos before "
+                             "combining with combine_datasets.py.")
 
     # ── GA hyperparameters ────────────────────────────────────────────────────
-    parser.add_argument("--pop-size",       type=int,   default=8)
-    parser.add_argument("--generations",    type=int,   default=5)
-    parser.add_argument("--mutation-rate",  type=float, default=0.20)
-    parser.add_argument("--min-mutation",   type=float, default=0.03)
-    parser.add_argument("--stagnation",     type=int,   default=3)
-    parser.add_argument("--alpha",          type=float, default=1.0)
-    parser.add_argument("--beta",           type=float, default=0.5)
-    # FIX Bug 1: action="store_true" + default=True means the flag is always
-    # True and can never be disabled from CLI. Use store_true/store_false pair.
+    parser.add_argument("--pop-size",         type=int,   default=20,
+                        help="Chromosomes per generation (default 20)")
+    parser.add_argument("--generations",      type=int,   default=30,
+                        help="Maximum GA generations (default 30)")
+    parser.add_argument("--mutation-rate",    type=float, default=0.20,
+                        help="Initial per-bit mutation probability")
+    parser.add_argument("--min-mutation",     type=float, default=0.03,
+                        help="Mutation rate floor (adaptive decay target)")
+    parser.add_argument("--stagnation",       type=int,   default=8,
+                        help="Stop if no improvement for N generations (default 8)")
+    parser.add_argument("--alpha",            type=float, default=1.0,
+                        help="Fitness accuracy weight")
+    parser.add_argument("--beta",             type=float, default=0.5,
+                        help="Fitness parsimony weight")
+    parser.add_argument("--n-epochs",         type=int,   default=100,
+                        help="ANN epochs per fitness evaluation (default 100)")
+    parser.add_argument("--no-kfold",         action="store_true",
+                        help="Use single train/val split instead of k-fold "
+                             "during GA (faster but noisier fitness signal)")
     parser.add_argument("--log-transform",    dest="log_transform",
                         action="store_true",  default=True)
     parser.add_argument("--no-log-transform", dest="log_transform",
@@ -54,35 +121,31 @@ def main():
                         help="Disable log1p target transform")
 
     # ── Research modules ──────────────────────────────────────────────────────
-    parser.add_argument("--run-baselines",   action="store_true",
-                        help="Run baseline comparison after GA")
-    parser.add_argument("--run-ablation",    action="store_true",
-                        help="Run ablation study after GA")
-    parser.add_argument("--run-stats",       action="store_true",
-                        help="Run Wilcoxon significance test after GA")
-    parser.add_argument("--run-tuning",      action="store_true",
-                        help="Run Optuna ANN hyperparameter search BEFORE GA")
-    parser.add_argument("--tune-trials",     type=int, default=50,
-                        help="Number of Optuna trials for hyperparameter tuning")
-    parser.add_argument("--multi-repo",      action="store_true",
-                        help="Run pipeline across multiple repos after GA")
-    parser.add_argument("--repos",           nargs='+',
-                        default=['flask', 'requests', 'django'],
+    parser.add_argument("--run-baselines",    action="store_true")
+    parser.add_argument("--run-ablation",     action="store_true")
+    parser.add_argument("--run-stats",        action="store_true")
+    parser.add_argument("--run-tuning",       action="store_true",
+                        help="Run Optuna ANN hyperparameter search before GA")
+    parser.add_argument("--tune-trials",      type=int,   default=50)
+    parser.add_argument("--multi-repo",       action="store_true")
+    parser.add_argument("--repos",            nargs='+',
+                        default=['flask', 'requests', 'click', 'httpx', 'fastapi'],
                         help="Repo names for --multi-repo")
-    parser.add_argument("--run-sensitivity", action="store_true",
-                        help="Run alpha/beta/pop_size sensitivity sweep")
-    parser.add_argument("--run-report",      action="store_true",
-                        help="Generate standalone HTML report from all results")
-    parser.add_argument("--n-trials",        type=int, default=5,
-                        help="Number of trials for baseline/ablation/stats")
+    parser.add_argument("--run-sensitivity",  action="store_true")
+    parser.add_argument("--run-report",       action="store_true")
+    parser.add_argument("--n-trials",         type=int,   default=30,
+                        help="Trials per method for baselines/ablation/stats "
+                             "(default 30)")
 
     # ── Pipeline toggles ──────────────────────────────────────────────────────
-    parser.add_argument("--force-collect", action="store_true")
-    parser.add_argument("--force-process", action="store_true")
-    parser.add_argument("--run-all",       action="store_true",
-                        help="Enable all research modules in one pass")
-    parser.add_argument("--force-all",     action="store_true",
-                        help="Re-run all stages even if outputs exist")
+    parser.add_argument("--force-collect",    action="store_true",
+                        help="Re-mine even if raw CSV exists")
+    parser.add_argument("--force-process",    action="store_true",
+                        help="Re-clean even if processed CSV exists")
+    parser.add_argument("--run-all",          action="store_true",
+                        help="Enable all research modules")
+    parser.add_argument("--force-all",        action="store_true",
+                        help="Re-run every stage regardless of existing outputs")
 
     args = parser.parse_args()
 
@@ -91,26 +154,26 @@ def main():
             args.run_stats = args.multi_repo = args.run_sensitivity = \
             args.run_report = True
 
-    # FIX Bug 9: ensure output directories exist for any user-specified paths
+    # Ensure output directories exist
     os.makedirs("data/results", exist_ok=True)
-    raw_dir = os.path.dirname(args.raw_file)
-    if raw_dir:
-        os.makedirs(raw_dir, exist_ok=True)
-    clean_dir = os.path.dirname(args.processed_file)
-    if clean_dir:
-        os.makedirs(clean_dir, exist_ok=True)
+    for path in [args.raw_file, args.processed_file]:
+        d = os.path.dirname(path)
+        if d:
+            os.makedirs(d, exist_ok=True)
 
     t0 = time.time()
 
     print("=" * 60)
     print("   AUTO-MAINTAINABILITY NEURO-GENETIC FRAMEWORK")
+    print(f"   Timeframe: {args.timeframe_months} months | "
+          f"Pop: {args.pop_size} | Gen: {args.generations} | "
+          f"Epochs: {args.n_epochs}")
     print("=" * 60)
 
-    # FIX Bug 2: compute _only_sensitivity BEFORE Step 0 so we can skip the
-    # clone entirely when just running a sensitivity sweep on existing data.
+    # Sensitivity-only shortcut
     GA_RESULTS_PATH = "data/results/ga_results.json"
-    _ga_exists      = (os.path.exists(GA_RESULTS_PATH)
-                       and os.path.getsize(GA_RESULTS_PATH) > 0)
+    _ga_exists = (os.path.exists(GA_RESULTS_PATH)
+                  and os.path.getsize(GA_RESULTS_PATH) > 0)
     _only_sensitivity = (
         args.run_sensitivity
         and not args.run_baselines
@@ -121,31 +184,22 @@ def main():
         and not args.force_all
     )
 
-    # ── Step 0: Clone repo if missing ────────────────────────────────────────
-    # Skip entirely if we are doing a sensitivity-only run on existing data —
-    # the repo is not needed for sensitivity (it only needs the clean CSV).
-    REPO_URLS = {
-        "flask":    "https://github.com/pallets/flask.git",
-        "requests": "https://github.com/psf/requests.git",
-        "django":   "https://github.com/django/django.git",
-    }
-
+    # ── Step 0: Clone repo if missing ─────────────────────────────────────────
     if _only_sensitivity and _ga_exists and os.path.exists(args.processed_file):
-        print("\n[STEP 0] Skipping clone — sensitivity-only run on existing data.")
+        print("\n[STEP 0] Skipping clone — sensitivity-only run.")
     elif not os.path.isdir(args.repo):
         repo_name = os.path.basename(args.repo.rstrip("/"))
         clone_url = REPO_URLS.get(repo_name)
         if clone_url:
             print(f"\n[STEP 0] '{args.repo}' not found — cloning from {clone_url}")
             os.makedirs(os.path.dirname(args.repo) or ".", exist_ok=True)
-            # FIX Bug 3: add timeout so a slow/hung clone doesn't block forever
             try:
                 result = subprocess.run(
                     ["git", "clone", clone_url, args.repo],
-                    capture_output=True, text=True, timeout=300
+                    capture_output=True, text=True
                 )
-            except subprocess.TimeoutExpired:
-                print("[ERROR] git clone timed out after 5 minutes.")
+            except Exception as e:
+                print(f"[ERROR] git clone failed: {e}")
                 sys.exit(1)
             if result.returncode != 0:
                 print(f"[ERROR] Clone failed:\n{result.stderr}")
@@ -154,25 +208,27 @@ def main():
         else:
             print(
                 f"[ERROR] '{args.repo}' does not exist and has no entry in "
-                f"REPO_URLS.\nEither push the repo, add it to REPO_URLS in "
-                f"main.py, or point --repo at an existing local path."
+                f"REPO_URLS.\nAvailable names: {list(REPO_URLS.keys())}"
             )
             sys.exit(1)
 
-    # ── Step 1: Mine ─────────────────────────────────────────────────────────
+    # ── Step 1: Mine ──────────────────────────────────────────────────────────
     if args.force_collect or args.force_all or not os.path.exists(args.raw_file):
-        print(f"\n[STEP 1] Mining: {args.repo}")
-        # FIX Bug 4: wrap in try/except — ValueError raised when no Python files
-        # are found (e.g. wrong repo path, too-shallow clone, empty snapshot).
+        print(f"\n[STEP 1] Mining: {args.repo} "
+              f"(timeframe={args.timeframe_months} months)")
         try:
-            build_dataset_from_repo(args.repo, args.raw_file)
+            build_dataset_from_repo(
+                args.repo,
+                args.raw_file,
+                timeframe_months=args.timeframe_months,
+            )
         except ValueError as e:
             print(f"\n[ERROR] Mining failed: {e}")
             print(
                 "  Possible causes:\n"
-                "  • The repo path is wrong or the clone is too shallow.\n"
-                "  • All files returned empty features (no commits in window).\n"
-                "  • Try --force-collect to re-mine, or pre-commit the CSV."
+                "  • Wrong repo path or not enough commit history\n"
+                "  • Increase --timeframe-months or use --force-collect after\n"
+                "    cloning with full history (remove --depth from git clone)"
             )
             sys.exit(1)
         except Exception as e:
@@ -182,15 +238,10 @@ def main():
         print(f"\n[STEP 1] Skipping — using '{args.raw_file}'")
 
     # ── Step 2: Clean ─────────────────────────────────────────────────────────
-    # FIX Bug 5: also check that raw_file is non-empty before preprocessing.
-    # An empty file (0 bytes) would cause pandas to raise an EmptyDataError.
-    _raw_empty = (
-        not os.path.exists(args.raw_file)
-        or os.path.getsize(args.raw_file) == 0
-    )
+    _raw_empty = (not os.path.exists(args.raw_file)
+                  or os.path.getsize(args.raw_file) == 0)
     if _raw_empty:
-        print(f"\n[ERROR] Raw file is missing or empty: {args.raw_file}")
-        print("  Run Step 1 first (mine the repository).")
+        print(f"\n[ERROR] Raw file missing or empty: {args.raw_file}")
         sys.exit(1)
 
     if args.force_process or args.force_all or not os.path.exists(args.processed_file):
@@ -203,11 +254,19 @@ def main():
     else:
         print(f"\n[STEP 2] Skipping — using '{args.processed_file}'")
 
-    # ── Step 2.5: Hyperparameter tuning ──────────────────────────────────────
+    # ── SKIP-GA early exit ────────────────────────────────────────────────────
+    if args.skip_ga:
+        print(f"\n[DONE] Mine + clean complete. "
+              f"Total time: {time.time() - t0:.1f}s")
+        print("  Next: python combine_datasets.py")
+        return
+
+    # ── Step 2.5: Hyperparameter tuning ───────────────────────────────────────
     HP_PATH = "data/results/best_hyperparams.json"
     if args.run_tuning:
-        if os.path.exists(HP_PATH) and not (args.force_collect or args.force_all):
-            print("\n[STEP 2.5] Skipping tuning — best_hyperparams.json already exists.")
+        if (os.path.exists(HP_PATH)
+                and not (args.force_collect or args.force_all)):
+            print("\n[STEP 2.5] Skipping — best_hyperparams.json exists.")
         else:
             from src.tune import run_tuning
             print("\n[STEP 2.5] Optuna ANN hyperparameter tuning...")
@@ -219,20 +278,15 @@ def main():
 
     # ── Step 3: GA ────────────────────────────────────────────────────────────
     if _only_sensitivity and _ga_exists:
-        # Sensitivity-only run: load existing GA results to get ga_chrom,
-        # then skip straight to Step 8. FIX Bug 6: args.run_tuning is always
-        # defined by argparse so getattr fallback was unnecessary.
-        print("\n[STEP 3] Skipping GA — using existing ga_results.json "
-              "for sensitivity-only run.")
+        print("\n[STEP 3] Skipping GA — using existing ga_results.json.")
         try:
             with open(GA_RESULTS_PATH) as _f:
                 ga_results = json.load(_f)
-            # FIX Bug 7: validate that the loaded JSON has the required keys
             if 'chromosome' not in ga_results:
-                raise KeyError("'chromosome' key missing from ga_results.json")
+                raise KeyError("'chromosome' key missing")
         except (json.JSONDecodeError, KeyError) as e:
-            print(f"[ERROR] ga_results.json is corrupt or uses an old schema: {e}")
-            print("  Delete data/results/ga_results.json and re-run the GA.")
+            print(f"[ERROR] ga_results.json corrupt or old schema: {e}")
+            print("  Delete data/results/ga_results.json and re-run.")
             sys.exit(1)
     else:
         print("\n[STEP 3] Starting Neuro-Genetic Optimisation...")
@@ -246,6 +300,8 @@ def main():
             beta              = args.beta,
             stagnation_limit  = args.stagnation,
             log_transform     = args.log_transform,
+            n_epochs          = args.n_epochs,
+            use_kfold         = not args.no_kfold,
         )
         ga_results = ga.evolve()
         ga_results['chromosome'] = list(ga_results['chromosome'])
@@ -259,9 +315,10 @@ def main():
     # ── Step 4: Baselines ─────────────────────────────────────────────────────
     if args.run_baselines:
         BASELINE_PATH = "data/results/baseline_results.json"
-        if (os.path.exists(BASELINE_PATH) and os.path.getsize(BASELINE_PATH) > 50
+        if (os.path.exists(BASELINE_PATH)
+                and os.path.getsize(BASELINE_PATH) > 50
                 and not (args.force_collect or args.force_all)):
-            print("\n[STEP 4] Skipping — baseline_results.json already exists.")
+            print("\n[STEP 4] Skipping — baseline_results.json exists.")
         else:
             from src.baseline import run_baselines
             run_baselines(
@@ -274,9 +331,10 @@ def main():
     # ── Step 5: Ablation ──────────────────────────────────────────────────────
     if args.run_ablation:
         ABLATION_PATH = "data/results/ablation_results.json"
-        if (os.path.exists(ABLATION_PATH) and os.path.getsize(ABLATION_PATH) > 50
+        if (os.path.exists(ABLATION_PATH)
+                and os.path.getsize(ABLATION_PATH) > 50
                 and not (args.force_collect or args.force_all)):
-            print("\n[STEP 5] Skipping — ablation_results.json already exists.")
+            print("\n[STEP 5] Skipping — ablation_results.json exists.")
         else:
             from src.ablation import run_ablation
             run_ablation(
@@ -288,9 +346,10 @@ def main():
     # ── Step 6: Stats ─────────────────────────────────────────────────────────
     if args.run_stats:
         STATS_PATH = "data/results/stats_results.json"
-        if (os.path.exists(STATS_PATH) and os.path.getsize(STATS_PATH) > 50
+        if (os.path.exists(STATS_PATH)
+                and os.path.getsize(STATS_PATH) > 50
                 and not (args.force_collect or args.force_all)):
-            print("\n[STEP 6] Skipping — stats_results.json already exists.")
+            print("\n[STEP 6] Skipping — stats_results.json exists.")
         else:
             from src.stats import run_significance_tests
             run_significance_tests(
@@ -303,9 +362,10 @@ def main():
     # ── Step 7: Multi-repo ────────────────────────────────────────────────────
     if args.multi_repo:
         MULTI_PATH = "data/results/multi_repo_results.json"
-        if (os.path.exists(MULTI_PATH) and os.path.getsize(MULTI_PATH) > 50
+        if (os.path.exists(MULTI_PATH)
+                and os.path.getsize(MULTI_PATH) > 50
                 and not (args.force_collect or args.force_all)):
-            print("\n[STEP 7] Skipping — multi_repo_results.json already exists.")
+            print("\n[STEP 7] Skipping — multi_repo_results.json exists.")
         else:
             from src.multi_repo import run_multi_repo
             print("\n[STEP 7] Running multi-repository comparison...")
@@ -319,6 +379,8 @@ def main():
                     alpha             = args.alpha,
                     beta              = args.beta,
                     stagnation_limit  = args.stagnation,
+                    n_epochs          = args.n_epochs,
+                    use_kfold         = not args.no_kfold,
                 ),
                 run_baselines = args.run_baselines,
             )
@@ -327,22 +389,21 @@ def main():
     if args.run_sensitivity:
         SENS_PATH = "data/results/sensitivity_results.json"
         _sens_valid = (os.path.exists(SENS_PATH)
-                        and os.path.getsize(SENS_PATH) > 50)  # >50 bytes = not empty/corrupt
+                       and os.path.getsize(SENS_PATH) > 50)
         if _sens_valid and not (args.force_collect or args.force_all):
-            print("\n[STEP 8] Skipping — sensitivity_results.json already exists.")
+            print("\n[STEP 8] Skipping — sensitivity_results.json exists.")
         else:
             from src.sensitivity import run_sensitivity
             print("\n[STEP 8] Running hyperparameter sensitivity sweep...")
             run_sensitivity(csv_file=args.processed_file)
 
     # ── Step 9: HTML Report ───────────────────────────────────────────────────
-    # FIX Bug 8: add skip guard — report is expensive and rarely needs to
-    # regenerate unless results have changed. Use --force-all to force refresh.
     if args.run_report:
         REPORT_PATH = "data/results/maintainability_report.html"
-        if (os.path.exists(REPORT_PATH) and os.path.getsize(REPORT_PATH) > 50
+        if (os.path.exists(REPORT_PATH)
+                and os.path.getsize(REPORT_PATH) > 50
                 and not (args.force_collect or args.force_all)):
-            print(f"\n[STEP 9] Skipping — report already exists at {REPORT_PATH}")
+            print(f"\n[STEP 9] Skipping — report exists at {REPORT_PATH}")
         else:
             from src.report import generate_report
             print("\n[STEP 9] Generating HTML report...")
@@ -356,7 +417,7 @@ def main():
                 print(f"  [WARN] Report generation failed (non-fatal): {e}")
 
     print(f"\n[DONE] Total time: {time.time() - t0:.1f}s")
-    print("  Launch dashboard: streamlit run app.py")
+    print("  View results: streamlit run app.py")
 
 
 if __name__ == "__main__":
