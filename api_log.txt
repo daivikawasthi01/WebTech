@@ -1,0 +1,298 @@
+INFO:     Started server process [45021]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60263 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60267 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60269 - "GET /api/data/summary?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60276 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60281 - "WebSocket /ws/ga-progress" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60280 - "POST /api/pipeline/run HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60286 - "WebSocket /ws/logs/66635b3a" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60289 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60294 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60299 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60305 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60312 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60325 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60331 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60338 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60343 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60355 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60363 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60368 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60375 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60382 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60389 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60395 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60402 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60407 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60413 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60417 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60420 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60423 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60430 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60435 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60442 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60447 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60453 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60460 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60467 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60472 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60479 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60484 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60491 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60497 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60504 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60509 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60515 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60523 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60532 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60538 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60545 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60577 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60589 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60602 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61189 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61191 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61193 - "GET /api/data/summary?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61195 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61210 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61214 - "POST /api/pipeline/run HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61217 - "WebSocket /ws/ga-progress" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61220 - "WebSocket /ws/logs/e3d19e3c" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:61223 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:61228 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61231 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61234 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61238 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61241 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61246 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61251 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61255 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61257 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61261 - "GET /api/results/baseline_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61263 - "GET /api/results/stats_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61269 - "GET /api/results/stats_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61267 - "GET /api/results/baseline_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61272 - "GET /api/results/ablation_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61275 - "GET /api/results/ablation_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61280 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61281 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61284 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61287 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61292 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61293 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61296 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61299 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61302 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61307 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61308 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61311 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61314 - "GET /api/feature-names?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61323 - "GET /api/diversity HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61322 - "GET /api/pareto HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61324 - "GET /api/results/baseline_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61332 - "GET /api/pareto HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61333 - "GET /api/results/baseline_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61331 - "GET /api/diversity HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61336 - "GET /api/results/multi_repo_results HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 715, in app
+    response = actual_response_class(content, **response_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 192, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 195, in render
+    return json.dumps(
+           ^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+ValueError: Out of range float values are not JSON compliant
+INFO:     127.0.0.1:61339 - "GET /api/results/multi_repo_results HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/fastapi/routing.py", line 715, in app
+    response = actual_response_class(content, **response_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 192, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/daivikawasthi/Desktop/SC Project/WebTech/venv/lib/python3.11/site-packages/starlette/responses.py", line 195, in render
+    return json.dumps(
+           ^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.11/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+ValueError: Out of range float values are not JSON compliant
+INFO:     127.0.0.1:61342 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61345 - "GET /api/results/sensitivity_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61348 - "GET /api/results/sensitivity_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61351 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61354 - "GET /api/results/ga_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61357 - "GET /api/data/summary?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61360 - "GET /api/data/summary?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61363 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61366 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61372 - "WebSocket /ws/ga-progress" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61370 - "POST /api/pipeline/run HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61375 - "WebSocket /ws/logs/89d90861" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61378 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:61381 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:61384 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61388 - "POST /api/pipeline/run HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61391 - "WebSocket /ws/ga-progress" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:61394 - "WebSocket /ws/logs/e7aa83f5" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:61397 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:61400 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61403 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61406 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61409 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61413 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61416 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61421 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61425 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61428 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61431 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61435 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61438 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61444 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61449 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61452 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61456 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61459 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61462 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61465 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61468 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61473 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61476 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61505 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61507 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61509 - "GET /api/data/summary?processed_file=data%2Fflask_dataset_clean.csv HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61516 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61519 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61523 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61527 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61530 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61533 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61536 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61540 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61543 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61547 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61550 - "GET /api/status HTTP/1.1" 200 OK

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sensitivity Analysis | NeuroGA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#353534",
+                        "outline": "#aa8986",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed": "#e4e2e2",
+                        "on-secondary": "#303031",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-container": "#5c0008",
+                        "secondary-container": "#464747",
+                        "surface": "#131313",
+                        "inverse-on-surface": "#313030",
+                        "tertiary-fixed-dim": "#c8c6c6",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary": "#c7c6c6",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#930013",
+                        "on-surface-variant": "#e4beba",
+                        "surface-tint": "#ffb3ad",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "on-tertiary": "#303030",
+                        "background": "#131313",
+                        "primary-fixed": "#ffdad7",
+                        "tertiary": "#c8c6c6",
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary-container": "#ff5450",
+                        "on-primary": "#68000a",
+                        "primary": "#ffb3ad",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-highest": "#353534",
+                        "on-tertiary-container": "#292a2a",
+                        "surface-container": "#201f1f",
+                        "tertiary-container": "#919090",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-secondary-container": "#b5b5b5",
+                        "inverse-primary": "#b91c24",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#410004",
+                        "surface-dim": "#131313",
+                        "on-background": "#e5e2e1",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#e3e2e2",
+                        "surface-bright": "#3a3939",
+                        "inverse-surface": "#e5e2e1",
+                        "outline-variant": "#5b403e",
+                        "primary-fixed-dim": "#ffb3ad"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 1.25rem;
+        }
+        body {
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-panel {
+            background: rgba(22, 22, 22, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(91, 64, 62, 0.15);
+        }
+        .crimson-pulse {
+            box-shadow: 0 0 15px rgba(229, 62, 62, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0a] text-on-surface font-['Inter'] antialiased tracking-tight">
+<!-- SideNavBar (rounded_sidebar) -->
+<aside class="bg-[#0e0e0e] h-full rounded-r-[12px] w-64 fixed left-0 top-0 flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<div class="text-lg font-bold tracking-tighter text-neutral-100 uppercase leading-tight">NEUROGA MAINTAINABILITY</div>
+<div class="text-[10px] font-bold tracking-tight uppercase text-[#e53e3e] mt-1">Precision Diagnostics</div>
+</div>
+<nav class="flex-1 overflow-y-auto no-scrollbar space-y-1">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">analytics</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Pipeline</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">query_stats</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">GA Results</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">rule</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Baselines</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">psychology</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Ablation</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">error_outline</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">File Risk</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">data_exploration</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">SHAP</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">edit_note</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Chromosome Editor</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">settings_suggest</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Advanced</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-4 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3">account_tree</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Multi-Repo</span>
+</a>
+<a class="flex items-center text-white bg-[#1c1b1b] border-l-2 border-[#e53e3e] py-3 px-4" href="#">
+<span class="material-symbols-outlined mr-3 text-[#e53e3e]">science</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Sensitivity</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-neutral-800 pt-4">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-2 px-6 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Settings</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-2 px-6 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">help</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar (breadcrumb_header) -->
+<header class="bg-[#0a0a0a]/60 backdrop-blur-md docked full-width top-0 sticky z-40 flex justify-between items-center w-full pl-72 pr-8 py-4">
+<div class="flex items-center gap-2 text-[13px] font-medium">
+<span class="text-[#e53e3e] font-semibold uppercase tracking-widest">OBSIDIAN PULSE</span>
+<span class="text-neutral-600">/</span>
+<span class="text-neutral-400">PROJECT: NEUROGA-X1</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-[11px] font-bold uppercase tracking-widest text-on-surface">RUNNING</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer scale-95 active:opacity-80 transition-all">notifications</span>
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer scale-95 active:opacity-80 transition-all">settings</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-4 min-h-screen p-8 bg-[#0a0a0a]">
+<!-- Header Section -->
+<header class="mb-12">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-light tracking-tight text-on-surface mb-2 italic">Parameter Sensitivity Matrix</h1>
+<p class="text-[10px] uppercase tracking-[1.5px] text-[#888]">Comprehensive analysis of Hyperparameter influence on NeuroGA fitness metrics</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-[#1c1b1b] px-4 py-2 rounded-lg border border-outline-variant/20 text-[10px] font-bold uppercase tracking-wider hover:bg-surface-container-high transition-colors">
+                        Export Dataset
+                    </button>
+<button class="bg-gradient-to-tr from-[#b91c24] to-[#ff5450] px-6 py-2 rounded-lg text-on-surface text-[10px] font-bold uppercase tracking-wider crimson-pulse active:scale-95 transition-all">
+                        Recalculate
+                    </button>
+</div>
+</div>
+</header>
+<!-- Stats Overview Row -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+<div class="surface-container-low p-5 rounded-xl border-l-2 border-[#e53e3e]">
+<div class="text-[10px] uppercase tracking-wider text-muted mb-1 opacity-50">Variance Score</div>
+<div class="text-2xl font-bold text-primary">0.842</div>
+<div class="text-[9px] text-green-500 mt-1">+12% Stability</div>
+</div>
+<div class="surface-container-low p-5 rounded-xl border-l-2 border-outline-variant">
+<div class="text-[10px] uppercase tracking-wider text-muted mb-1 opacity-50">Max MSE</div>
+<div class="text-2xl font-bold text-on-surface">1.22e-4</div>
+<div class="text-[9px] text-[#444] mt-1">Threshold: 2.0e-4</div>
+</div>
+<div class="surface-container-low p-5 rounded-xl border-l-2 border-outline-variant">
+<div class="text-[10px] uppercase tracking-wider text-muted mb-1 opacity-50">Pop Size Alpha</div>
+<div class="text-2xl font-bold text-on-surface">512</div>
+<div class="text-[9px] text-[#444] mt-1">Optimal Range: 400-600</div>
+</div>
+<div class="surface-container-low p-5 rounded-xl border-l-2 border-[#e53e3e]">
+<div class="text-[10px] uppercase tracking-wider text-muted mb-1 opacity-50">Convergence</div>
+<div class="text-2xl font-bold text-primary">0.99</div>
+<div class="text-[9px] text-green-500 mt-1">Signal Locked</div>
+</div>
+</div>
+<!-- Charts Bento Grid -->
+<div class="grid grid-cols-12 gap-6 h-[600px]">
+<!-- α × β HEATMAP -->
+<div class="col-span-7 surface-container-low rounded-xl p-6 relative overflow-hidden group">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-lg font-medium text-on-surface uppercase tracking-tight">α × β HEATMAP</h2>
+<span class="text-[10px] uppercase text-[#444]">Source: /api/results/sensitivity</span>
+</div>
+<!-- Mock Heatmap Container -->
+<div class="w-full h-full pb-12 flex items-center justify-center">
+<div class="relative w-full h-full bg-[#0d0d0d] rounded border border-[#1a1a1a] p-8">
+<div class="grid grid-cols-10 grid-rows-10 w-full h-full gap-[1px]">
+<!-- Generating a manual gradient for visual effect -->
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#220000]"></div><div class="bg-[#440000]"></div><div class="bg-[#660000]"></div><div class="bg-[#880000]"></div><div class="bg-[#aa0000]"></div><div class="bg-[#cc0000]"></div><div class="bg-[#ee0000]"></div><div class="bg-red-600"></div>
+<div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div><div class="bg-[#dd0000]"></div><div class="bg-red-600"></div><div class="bg-[#ff4444]"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#220000]"></div><div class="bg-[#440000]"></div><div class="bg-[#660000]"></div><div class="bg-[#880000]"></div><div class="bg-[#aa0000]"></div><div class="bg-[#cc0000]"></div><div class="bg-[#ee0000]"></div><div class="bg-red-600"></div>
+<div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div><div class="bg-[#dd0000]"></div><div class="bg-red-600"></div><div class="bg-[#ff4444]"></div><div class="bg-[#ff6666]"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#220000]"></div><div class="bg-[#440000]"></div><div class="bg-[#660000]"></div><div class="bg-[#880000]"></div><div class="bg-[#aa0000]"></div><div class="bg-[#cc0000]"></div><div class="bg-[#ee0000]"></div><div class="bg-red-600"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div><div class="bg-[#dd0000]"></div><div class="bg-red-600"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div><div class="bg-[#dd0000]"></div><div class="bg-red-600"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div><div class="bg-[#dd0000]"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div><div class="bg-[#bb0000]"></div>
+<div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-black"></div><div class="bg-[#110000]"></div><div class="bg-[#330000]"></div><div class="bg-[#550000]"></div><div class="bg-[#770000]"></div><div class="bg-[#990000]"></div>
+</div>
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-widest text-[#555]">Alpha Coefficient (X)</div>
+<div class="absolute left-1 top-1/2 -translate-y-1/2 -rotate-90 text-[9px] uppercase tracking-widest text-[#555]">Beta Multiplier (Y)</div>
+</div>
+</div>
+<div class="absolute bottom-6 right-6 flex items-center gap-2">
+<span class="text-[8px] uppercase text-[#444]">Min (0.0)</span>
+<div class="w-32 h-2 bg-gradient-to-r from-black via-red-800 to-red-600 rounded"></div>
+<span class="text-[8px] uppercase text-[#444]">Max (1.0)</span>
+</div>
+</div>
+<!-- POPULATION SIZE EFFECT -->
+<div class="col-span-5 surface-container-low rounded-xl p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-lg font-medium text-on-surface uppercase tracking-tight">POPULATION SIZE EFFECT</h2>
+<div class="flex gap-2 items-center">
+<span class="w-2 h-2 bg-[#e53e3e] rounded-full"></span>
+<span class="text-[10px] text-[#888] uppercase tracking-wide">MSE Trend</span>
+</div>
+</div>
+<div class="flex-1 w-full bg-[#0a0a0a] rounded border border-[#1a1a1a] relative p-8">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 100 100">
+<line stroke="#1a1a1a" stroke-width="0.5" x1="0" x2="100" y1="20" y2="20"></line>
+<line stroke="#1a1a1a" stroke-width="0.5" x1="0" x2="100" y1="40" y2="40"></line>
+<line stroke="#1a1a1a" stroke-width="0.5" x1="0" x2="100" y1="60" y2="60"></line>
+<line stroke="#1a1a1a" stroke-width="0.5" x1="0" x2="100" y1="80" y2="80"></line>
+<path class="drop-shadow-[0_0_5px_rgba(229,62,62,0.6)]" d="M 0 90 Q 20 85, 40 40 T 80 20 L 100 15" fill="none" stroke="#e53e3e" stroke-width="2"></path>
+<circle cx="0" cy="90" fill="#e53e3e" r="1.5"></circle>
+<circle cx="40" cy="40" fill="#e53e3e" r="1.5"></circle>
+<circle cx="80" cy="20" fill="#e53e3e" r="1.5"></circle>
+<circle cx="100" cy="15" fill="#e53e3e" r="1.5"></circle>
+</svg>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-widest text-[#555]">Population Size (X)</div>
+<div class="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-[9px] uppercase tracking-widest text-[#555]">Mean Squared Error (Y)</div>
+<div class="absolute top-1/2 right-12 flex flex-col items-end opacity-40">
+<span class="text-[8px] border-b border-[#333] pb-1 mb-1 tracking-widest">THRESHOLD REACHED</span>
+<span class="text-[12px] font-bold">OPTIMAL N=512</span>
+</div>
+</div>
+<div class="mt-6">
+<p class="text-[11px] text-[#888] leading-relaxed">The inverse correlation between <span class="text-[#e53e3e]">N-Size</span> and <span class="text-[#e53e3e]">MSE</span> plateaued at N=512, suggesting diminishing returns for larger population pools in the current manifold.</p>
+</div>
+</div>
+</div>
+<!-- Param Breakdown Table -->
+<div class="mt-8 surface-container-low rounded-xl overflow-hidden border border-[#1a1a1a]">
+<div class="px-6 py-4 border-b border-[#1a1a1a] flex justify-between items-center bg-[#0d0d0d]">
+<span class="text-[10px] font-bold tracking-widest uppercase text-neutral-400">Variable Influence Weights</span>
+<span class="material-symbols-outlined text-xs text-[#555]">filter_list</span>
+</div>
+<table class="w-full text-left">
+<thead>
+<tr class="text-[10px] uppercase tracking-widest text-[#555] bg-[#0a0a0a]">
+<th class="px-6 py-4 font-medium">Parameter</th>
+<th class="px-6 py-4 font-medium">Significance</th>
+<th class="px-6 py-4 font-medium">Confidence Interval</th>
+<th class="px-6 py-4 font-medium">Influence Score</th>
+<th class="px-6 py-4 font-medium text-right">State</th>
+</tr>
+</thead>
+<tbody class="text-[12px] font-medium divide-y divide-[#1a1a1a]">
+<tr class="hover:bg-[#111] transition-colors">
+<td class="px-6 py-4 text-on-surface">Alpha Coefficient</td>
+<td class="px-6 py-4 text-[#888]">Primary Gradient</td>
+<td class="px-6 py-4 text-[#888]">0.89 - 0.94</td>
+<td class="px-6 py-4">
+<div class="w-24 h-1.5 bg-[#1a1a1a] rounded overflow-hidden">
+<div class="w-[92%] h-full bg-[#e53e3e]"></div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="px-2 py-0.5 rounded text-[10px] bg-red-900/30 text-red-400 border border-red-900/50">VOLATILE</span>
+</td>
+</tr>
+<tr class="hover:bg-[#111] transition-colors">
+<td class="px-6 py-4 text-on-surface">Beta Multiplier</td>
+<td class="px-6 py-4 text-[#888]">Secondary Scaler</td>
+<td class="px-6 py-4 text-[#888]">0.42 - 0.51</td>
+<td class="px-6 py-4">
+<div class="w-24 h-1.5 bg-[#1a1a1a] rounded overflow-hidden">
+<div class="w-[45%] h-full bg-[#e53e3e]"></div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="px-2 py-0.5 rounded text-[10px] bg-[#1a1a1a] text-[#888] border border-[#333]">STABLE</span>
+</td>
+</tr>
+<tr class="hover:bg-[#111] transition-colors">
+<td class="px-6 py-4 text-on-surface">Pop_Size N</td>
+<td class="px-6 py-4 text-[#888]">Global Resource</td>
+<td class="px-6 py-4 text-[#888]">0.12 - 0.15</td>
+<td class="px-6 py-4">
+<div class="w-24 h-1.5 bg-[#1a1a1a] rounded overflow-hidden">
+<div class="w-[15%] h-full bg-[#e53e3e]"></div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="px-2 py-0.5 rounded text-[10px] bg-[#1a1a1a] text-[#888] border border-[#333]">INERT</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+<!-- Contextual Information Modal Overlay -->
+<div class="fixed bottom-6 right-6 z-[60]">
+<div class="glass-panel p-4 rounded-xl shadow-2xl flex items-center gap-4 border border-neutral-800">
+<div class="w-10 h-10 rounded-lg bg-[#e53e3e]/10 flex items-center justify-center border border-[#e53e3e]/20">
+<span class="material-symbols-outlined text-[#e53e3e]">info</span>
+</div>
+<div>
+<div class="text-[10px] font-bold uppercase text-on-surface tracking-wider">Analysis Active</div>
+<div class="text-[11px] text-[#888]">Sampling iteration 8,402 of 10,000</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,32 @@
+# Dockerfile.api — FastAPI + ML deps
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System deps: git for GitPython, build tools for radon/torch
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps — split into layers for cache efficiency
+COPY requirements.txt requirements_api.txt ./
+
+# Core ML stack (torch CPU — saves ~1.5GB vs GPU build)
+RUN pip install --no-cache-dir \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    -r requirements.txt
+
+# API-specific deps
+RUN pip install --no-cache-dir -r requirements_api.txt
+
+# Optional: SHAP (heavy — comment out if not needed)
+# RUN pip install --no-cache-dir shap
+
+# Copy project
+COPY src/        ./src/
+COPY api/        ./api/
+COPY main.py     ./
+
+RUN mkdir -p data/results
+
+EXPOSE 8000

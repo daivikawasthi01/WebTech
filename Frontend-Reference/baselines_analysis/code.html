@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NeuroGA Baselines | OBSIDIAN PULSE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#131313",
+                        "surface-container": "#201f1f",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface": "#e5e2e1",
+                        "primary": "#e53e3e",
+                        "secondary": "#a1a1aa",
+                        "outline-variant": "rgba(91, 64, 62, 0.15)"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "8px",
+                        "lg": "8px",
+                        "xl": "8px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0a0a0a; color: #e5e2e1; font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(14, 14, 14, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(229, 62, 62, 0.1); }
+        .crimson-gradient { background: linear-gradient(45deg, #b91c24, #e53e3e); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex min-h-screen overflow-hidden antialiased">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#0e0e0e] z-50 flex flex-col py-8 border-r border-white/5">
+<div class="px-6 mb-10">
+<h1 class="text-lg font-bold tracking-tighter text-white uppercase">NeuroGA Maintainability</h1>
+<p class="text-[10px] uppercase font-bold text-primary tracking-widest mt-1">Precision Diagnostics</p>
+</div>
+<nav class="flex-1 space-y-0.5 overflow-y-auto no-scrollbar px-3">
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">analytics</span> Pipeline
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">query_stats</span> GA Results
+            </a>
+<!-- Active State: Baselines -->
+<a class="flex items-center text-white bg-white/5 border-l-2 border-primary py-3 px-3 text-[11px] font-bold uppercase tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3 text-sm text-primary">rule</span> Baselines
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">psychology</span> Ablation
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">error_outline</span> File Risk
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">data_exploration</span> SHAP
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">edit_note</span> Chromosome Editor
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight group" href="#">
+<span class="material-symbols-outlined mr-3 text-sm transition-colors group-hover:text-primary">settings_suggest</span> Advanced
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-white/5 px-3 space-y-0.5">
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">settings</span> Settings
+            </a>
+<a class="flex items-center text-secondary hover:text-white hover:bg-white/5 py-3 px-3 transition-all duration-200 text-[11px] font-bold uppercase tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">help</span> Support
+            </a>
+</div>
+</aside>
+<!-- Content Area -->
+<div class="flex-1 flex flex-col min-w-0 ml-64 overflow-hidden h-screen">
+<!-- Top Header -->
+<header class="h-16 flex items-center justify-between px-8 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40">
+<div class="flex items-center space-x-2 text-xs font-medium tracking-tight">
+<span class="text-secondary">NeuroGA</span>
+<span class="text-white/20">/</span>
+<span class="text-secondary">Baselines</span>
+<span class="text-white/20">/</span>
+<span class="text-primary font-bold">V4.2.1</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+<span class="text-[10px] uppercase tracking-widest font-black text-primary">RUNNING</span>
+</div>
+<div class="flex items-center gap-4 text-secondary">
+<span class="material-symbols-outlined text-xl hover:text-white cursor-pointer transition-colors">notifications</span>
+<span class="material-symbols-outlined text-xl hover:text-white cursor-pointer transition-colors">settings</span>
+<img alt="User" class="w-7 h-7 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3-AOV_qCSTLD-SyCFXa8UbZc7QwUBrfPcm8S3MNfVW5gBToDNGyUxQatwOz4ABI0eZGFq8WCfHORnYf3tbrUT2MZundYY1LuEV55lXd88HaTSrZIYNKZtv_uWCWL9CninrzWmCFl7vzGxP2fG7MACcU0dhRTc1WYqj54nAsvkbynrGheCOjWZdFfyzjsF4Rtb9mujd_f2B-vrEMZwtbikyClVWLbVLP0HCCQVlX234sNqFjvKHQ340A30BYZmiVsCPUfblmKdtbg"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+<!-- Hero Title -->
+<div class="space-y-1">
+<h2 class="text-3xl font-bold tracking-tight text-white">Baselines Analysis</h2>
+<p class="text-[11px] uppercase tracking-[0.2em] text-secondary">Historical Performance Benchmark vs Evolutionary Delta</p>
+</div>
+<!-- Charts Grid -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Performance Metrics -->
+<div class="col-span-12 lg:col-span-7 bg-[#111111] rounded-lg p-6 border border-white/5">
+<div class="flex justify-between items-start mb-10">
+<div>
+<h3 class="text-xs font-bold text-white uppercase tracking-widest mb-1">Performance Metrics</h3>
+<p class="text-[10px] text-secondary uppercase tracking-wider">MSE Efficiency by methodology</p>
+</div>
+<span class="material-symbols-outlined text-secondary/30">analytics</span>
+</div>
+<div class="flex items-end justify-between h-48 w-full gap-8">
+<!-- Chart Columns -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full flex items-end justify-center gap-1.5 h-full bg-white/5 rounded-sm p-1">
+<div class="w-full bg-[#222] h-[40%] rounded-sm"></div>
+<div class="w-full crimson-gradient h-[85%] rounded-sm shadow-[0_0_20px_rgba(229,62,62,0.2)]"></div>
+<div class="w-full bg-[#1a1a1a] h-[55%] rounded-sm"></div>
+</div>
+<span class="text-[10px] uppercase font-bold text-secondary">Set Alpha</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full flex items-end justify-center gap-1.5 h-full bg-white/5 rounded-sm p-1">
+<div class="w-full bg-[#222] h-[30%] rounded-sm"></div>
+<div class="w-full crimson-gradient h-[92%] rounded-sm shadow-[0_0_20px_rgba(229,62,62,0.2)]"></div>
+<div class="w-full bg-[#1a1a1a] h-[45%] rounded-sm"></div>
+</div>
+<span class="text-[10px] uppercase font-bold text-secondary">Set Gamma</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full flex items-end justify-center gap-1.5 h-full bg-white/5 rounded-sm p-1">
+<div class="w-full bg-[#222] h-[60%] rounded-sm"></div>
+<div class="w-full crimson-gradient h-[78%] rounded-sm shadow-[0_0_20px_rgba(229,62,62,0.2)]"></div>
+<div class="w-full bg-[#1a1a1a] h-[50%] rounded-sm"></div>
+</div>
+<span class="text-[10px] uppercase font-bold text-secondary">Validation</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="mt-8 flex gap-6 border-t border-white/5 pt-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full crimson-gradient"></span>
+<span class="text-[10px] uppercase font-medium text-secondary">ANN-GA (Target)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#222]"></span>
+<span class="text-[10px] uppercase font-medium text-secondary">Base LSTM</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#1a1a1a]"></span>
+<span class="text-[10px] uppercase font-medium text-secondary">Standard RNN</span>
+</div>
+</div>
+</div>
+<!-- Trial Stability -->
+<div class="col-span-12 lg:col-span-5 bg-[#111111] rounded-lg p-6 border border-white/5">
+<div class="mb-10">
+<h3 class="text-xs font-bold text-white uppercase tracking-widest mb-1">Trial Stability</h3>
+<p class="text-[10px] text-secondary uppercase tracking-wider">Convergence Reliability Index</p>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] uppercase font-bold">
+<span class="text-white">ANN-GA Hybrid</span>
+<span class="text-primary">98.4%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full crimson-gradient" style="width: 98.4%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] uppercase font-bold">
+<span class="text-white">Differential Evolution</span>
+<span class="text-secondary">74.2%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-white/20" style="width: 74.2%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] uppercase font-bold">
+<span class="text-white">Particle Swarm Opt</span>
+<span class="text-secondary">62.8%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-white/20" style="width: 62.8%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] uppercase font-bold">
+<span class="text-white">Bayesian Optimization</span>
+<span class="text-secondary">88.1%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-white/20" style="width: 88.1%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Table Section -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-sm font-bold text-white uppercase tracking-widest">Experimental Dataset Summary</h3>
+<p class="text-[10px] uppercase tracking-widest text-secondary mt-1">Results pulled from /api/results/baselines</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-[10px] font-bold uppercase tracking-widest text-white transition-colors">Filter</button>
+<button class="px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-[10px] font-bold uppercase tracking-widest text-white transition-colors">Export</button>
+</div>
+</div>
+<div class="overflow-hidden rounded-lg border border-white/5">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-white/[0.02] text-[10px] uppercase tracking-[0.15em] text-secondary font-black">
+<th class="py-4 px-6 border-b border-white/5">Architecture ID</th>
+<th class="py-4 px-6 border-b border-white/5">Methodology</th>
+<th class="py-4 px-6 border-b border-white/5">Avg MSE</th>
+<th class="py-4 px-6 border-b border-white/5">R² Score</th>
+<th class="py-4 px-6 border-b border-white/5">Latency</th>
+<th class="py-4 px-6 border-b border-white/5">Status</th>
+</tr>
+</thead>
+<tbody class="text-xs">
+<tr class="bg-primary/5 border-l-2 border-primary">
+<td class="py-4 px-6 font-mono text-primary font-bold">#GA-9912-PRIME</td>
+<td class="py-4 px-6 text-white font-medium uppercase tracking-tight">ANN-GA Hybrid (Recursive)</td>
+<td class="py-4 px-6 text-primary font-bold">0.00124</td>
+<td class="py-4 px-6 text-primary font-bold">0.9984</td>
+<td class="py-4 px-6 text-primary">12.4ms</td>
+<td class="py-4 px-6">
+<span class="px-2 py-1 rounded bg-primary text-[9px] font-black uppercase tracking-widest text-white">Optimal</span>
+</td>
+</tr>
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+<td class="py-4 px-6 font-mono text-secondary">#BS-2041-LSTM</td>
+<td class="py-4 px-6 text-secondary uppercase tracking-tight">Standard LSTM Baseline</td>
+<td class="py-4 px-6 text-white">0.01420</td>
+<td class="py-4 px-6 text-white">0.9421</td>
+<td class="py-4 px-6 text-white">18.1ms</td>
+<td class="py-4 px-6">
+<span class="px-2 py-1 rounded bg-white/10 text-[9px] font-black uppercase tracking-widest text-secondary">Standard</span>
+</td>
+</tr>
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+<td class="py-4 px-6 font-mono text-secondary">#BS-2042-GRU</td>
+<td class="py-4 px-6 text-secondary uppercase tracking-tight">Vanilla GRU Architecture</td>
+<td class="py-4 px-6 text-white">0.02561</td>
+<td class="py-4 px-6 text-white">0.8912</td>
+<td class="py-4 px-6 text-white">14.3ms</td>
+<td class="py-4 px-6">
+<span class="px-2 py-1 rounded bg-white/10 text-[9px] font-black uppercase tracking-widest text-secondary">Standard</span>
+</td>
+</tr>
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+<td class="py-4 px-6 font-mono text-secondary">#BS-2045-TFM</td>
+<td class="py-4 px-6 text-secondary uppercase tracking-tight">Vanilla Transformer (Small)</td>
+<td class="py-4 px-6 text-white">0.00542</td>
+<td class="py-4 px-6 text-white">0.9678</td>
+<td class="py-4 px-6 text-white">42.8ms</td>
+<td class="py-4 px-6">
+<span class="px-2 py-1 rounded bg-white/10 text-[9px] font-black uppercase tracking-widest text-secondary">Standard</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Analysis Insight Footer -->
+<div class="glass-panel p-8 rounded-lg flex flex-col md:flex-row items-center justify-between gap-8 border-l-4 border-primary">
+<div class="flex-1 space-y-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">info</span>
+<h3 class="text-xs font-black text-white uppercase tracking-[0.2em]">Baseline Analysis Insight</h3>
+</div>
+<p class="text-[13px] text-secondary leading-relaxed max-w-3xl">
+                        The Genetic Algorithm augmentation has demonstrated a significant <span class="text-primary font-bold">12.4% reduction</span> in Mean Squared Error compared to the standard LSTM baseline. Convergence stability remains high at <span class="text-white font-bold">98.4%</span>, suggesting that the current hyper-parameter search space is well-optimized for the given signal noise floor.
+                    </p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="px-6 py-3 border border-white/10 hover:bg-white/5 text-secondary text-[10px] font-black uppercase tracking-widest rounded transition-all">
+                        Download Raw Logs
+                    </button>
+<button class="px-6 py-3 crimson-gradient text-white text-[10px] font-black uppercase tracking-widest rounded shadow-[0_10px_20px_-5px_rgba(229,62,62,0.4)] active:scale-[0.98] transition-all">
+                        Generate Full Report
+                    </button>
+</div>
+</div>
+<!-- Metadata Footer -->
+<footer class="pt-8 pb-4 flex justify-between items-center border-t border-white/5 opacity-40">
+<p class="text-[9px] font-mono tracking-widest uppercase">Encryption: AES-256-GCM</p>
+<p class="text-[9px] font-mono tracking-widest uppercase">System Clock: 04:22:11 UTC</p>
+</footer>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(32, 32, 32, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(81, 67, 65, 0.3);
+  }
+  
+  .noir-glass {
+    background: linear-gradient(135deg, rgba(28,28,27,0.8) 0%, rgba(19,19,19,0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(81,67,65, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+  
+  .crimson-glow {
+    box-shadow: 0 0 15px rgba(186, 18, 36, 0.4);
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #131313;
+}
+::-webkit-scrollbar-thumb {
+  background: #353534;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #514341;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 179, 177, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(255, 179, 177, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 179, 177, 0.2); }
+}
+
+/* Log console font */
+.log-console { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
+
+html, body {
+  @apply bg-background text-on-background antialiased selection:bg-primary selection:text-on-primary;
+}

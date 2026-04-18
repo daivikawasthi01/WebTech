@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GA Results | NEUROGA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#353534",
+                        "outline": "#aa8986",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed": "#e4e2e2",
+                        "on-secondary": "#303031",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-container": "#5c0008",
+                        "secondary-container": "#464747",
+                        "surface": "#131313",
+                        "inverse-on-surface": "#313030",
+                        "tertiary-fixed-dim": "#c8c6c6",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary": "#c7c6c6",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#930013",
+                        "on-surface-variant": "#e4beba",
+                        "surface-tint": "#ffb3ad",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "on-tertiary": "#303030",
+                        "background": "#131313",
+                        "primary-fixed": "#ffdad7",
+                        "tertiary": "#c8c6c6",
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary-container": "#ff5450",
+                        "on-primary": "#68000a",
+                        "primary": "#ffb3ad",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-highest": "#353534",
+                        "on-tertiary-container": "#292a2a",
+                        "surface-container": "#201f1f",
+                        "tertiary-container": "#919090",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-secondary-container": "#b5b5b5",
+                        "inverse-primary": "#b91c24",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#410004",
+                        "surface-dim": "#131313",
+                        "on-background": "#e5e2e1",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#e3e2e2",
+                        "surface-bright": "#3a3939",
+                        "inverse-surface": "#e5e2e1",
+                        "outline-variant": "#5b403e",
+                        "primary-fixed-dim": "#ffb3ad"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+        .precision-border {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0a] text-on-surface font-['Inter'] antialiased tracking-tight">
+<!-- SideNavBar -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-[#0e0e0e] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="text-lg font-bold tracking-tighter text-neutral-100 uppercase">NEUROGA</h1>
+<p class="text-[10px] font-bold uppercase tracking-widest text-[#e53e3e]">MAINTAINABILITY</p>
+<p class="text-[9px] font-medium uppercase text-neutral-500 mt-1">Precision Diagnostics</p>
+</div>
+<nav class="flex-1 overflow-y-auto space-y-0.5">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">analytics</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Pipeline</span>
+</a>
+<a class="flex items-center text-white bg-[#1c1b1b] border-l-2 border-[#e53e3e] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">GA Results</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">rule</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Baselines</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">psychology</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Ablation</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">error_outline</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">File Risk</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">data_exploration</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">SHAP</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">edit_note</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Chromosome Editor</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings_suggest</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Advanced</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_tree</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Multi-Repo</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">science</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Sensitivity</span>
+</a>
+</nav>
+<div class="mt-auto pt-4 space-y-0.5 border-t border-white/5">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Settings</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">help_outline</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky z-40 flex justify-between items-center w-full pl-72 pr-8 py-4 bg-[#0a0a0a]/60 backdrop-blur-md">
+<div class="flex items-center gap-4">
+<span class="text-[13px] font-medium text-neutral-400">OBSIDIAN PULSE</span>
+<div class="h-1.5 w-1.5 rounded-full bg-[#e53e3e] shadow-[0_0_8px_#e53e3e]"></div>
+<span class="text-[13px] font-semibold text-[#e53e3e]">RUNNING</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors text-[20px]">notifications</span>
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors text-[20px]">settings</span>
+</div>
+<div class="px-3 py-1 border border-[#e53e3e]/30 bg-[#e53e3e]/5 rounded text-[10px] font-bold text-[#e53e3e] tracking-widest uppercase">
+                IDLE
+            </div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 min-h-screen p-8">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Hero Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- BEST MSE -->
+<div class="bg-[#111111] p-6 rounded-[12px] precision-border flex flex-col justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-secondary">BEST MSE</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="text-[36px] font-black tracking-tighter text-[#e53e3e]">0.00142</span>
+<span class="text-[12px] text-primary opacity-60">↓ 4.2%</span>
+</div>
+<div class="mt-2 h-1 w-full bg-[#1a1a1a] rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-inverse-primary to-primary-container w-4/5"></div>
+</div>
+</div>
+<!-- FEATURES SELECTED -->
+<div class="bg-[#111111] p-6 rounded-[12px] precision-border flex flex-col justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-secondary">FEATURES SELECTED</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="text-[36px] font-black tracking-tighter text-on-surface">42<span class="text-muted text-[18px] font-normal text-[#444]">/128</span></span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary">filter_list</span>
+<span class="text-[10px] uppercase font-bold text-[#888]">Optimized Subset Active</span>
+</div>
+</div>
+<!-- ELAPSED -->
+<div class="bg-[#111111] p-6 rounded-[12px] precision-border flex flex-col justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-secondary">ELAPSED TIME</span>
+<div class="mt-4">
+<span class="text-[36px] font-black tracking-tighter text-on-surface tabular-nums">04:12:33</span>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-success">sync</span>
+<span class="text-[10px] uppercase font-bold text-[#888]">GEN 450 / 1000</span>
+</div>
+</div>
+</div>
+<!-- Visual Data Layer -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Best MSE Over Generations -->
+<div class="bg-[#111111] p-8 rounded-[12px] precision-border">
+<div class="flex justify-between items-start mb-12">
+<div>
+<h2 class="text-[22px] font-medium tracking-tight text-on-surface">BEST MSE OVER GENERATIONS</h2>
+<p class="text-[10px] uppercase font-bold text-[#444] mt-1 tracking-widest">Training Convergence Metric</p>
+</div>
+<div class="flex gap-2">
+<div class="flex items-center gap-2">
+<div class="w-3 h-0.5 bg-[#e53e3e]"></div>
+<span class="text-[10px] uppercase font-bold text-[#888]">Current</span>
+</div>
+<div class="flex items-center gap-2 ml-4">
+<div class="w-3 h-0.5 border-t border-dashed border-[#888]"></div>
+<span class="text-[10px] uppercase font-bold text-[#888]">Baseline</span>
+</div>
+</div>
+</div>
+<div class="h-[300px] w-full relative">
+<div class="absolute inset-0 flex flex-col justify-between py-2">
+<div class="w-full h-[1px] bg-[#1a1a1a]"></div>
+<div class="w-full h-[1px] bg-[#1a1a1a]"></div>
+<div class="w-full h-[1px] bg-[#1a1a1a]"></div>
+<div class="w-full h-[1px] bg-[#1a1a1a]"></div>
+<div class="w-full h-[1px] bg-[#1a1a1a]"></div>
+</div>
+<svg class="absolute inset-0 h-full w-full overflow-visible" preserveaspectratio="none">
+<path d="M0 150 Q 150 140, 300 130 T 600 120" fill="none" stroke="#444" stroke-dasharray="4,4" stroke-width="1.5"></path>
+<path class="drop-shadow-[0_0_4px_rgba(229,62,62,0.4)]" d="M0 280 L 50 240 L 100 210 L 150 140 L 200 110 L 250 85 L 300 70 L 400 55 L 500 50 L 600 48" fill="none" stroke="#e53e3e" stroke-width="2"></path>
+<circle cx="600" cy="48" fill="#e53e3e" r="4"></circle>
+</svg>
+<div class="absolute -left-8 top-0 h-full flex flex-col justify-between text-[10px] font-bold text-[#444]">
+<span>0.10</span><span>0.08</span><span>0.06</span><span>0.04</span><span>0.02</span>
+</div>
+</div>
+</div>
+<!-- Adaptive Probability Decay -->
+<div class="bg-[#111111] p-8 rounded-[12px] precision-border">
+<div class="flex justify-between items-start mb-12">
+<div>
+<h2 class="text-[22px] font-medium tracking-tight text-on-surface">ADAPTIVE PROBABILITY DECAY</h2>
+<p class="text-[10px] uppercase font-bold text-[#444] mt-1 tracking-widest">Mutation &amp; Crossover Weights</p>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">more_vert</span>
+</div>
+<div class="h-[300px] flex items-end gap-3 px-4">
+<div class="flex-1 bg-[#e53e3e] opacity-20 h-[90%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] opacity-30 h-[85%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] opacity-40 h-[75%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] opacity-60 h-[65%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] opacity-75 h-[55%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] opacity-90 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] h-[30%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] h-[25%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] h-[22%] rounded-t-sm"></div>
+<div class="flex-1 bg-[#e53e3e] h-[18%] rounded-t-sm"></div>
+</div>
+<div class="flex justify-between mt-4 px-4 text-[10px] font-bold text-[#444]">
+<span>GEN 0</span><span>GEN 100</span><span>GEN 200</span><span>GEN 300</span><span>GEN 400</span><span>GEN 500</span>
+</div>
+</div>
+</div>
+<!-- Selected Features Module -->
+<div class="bg-[#111111] p-8 rounded-[12px] precision-border">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div>
+<h2 class="text-[22px] font-medium tracking-tight text-on-surface">SELECTED FEATURES</h2>
+<p class="text-[10px] uppercase font-bold text-[#444] mt-1 tracking-widest">Hierarchical Feature Importance Groups</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2 border border-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/5 transition-all">Refine Model</button>
+<button class="px-5 py-2 border border-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/5 transition-all">Export CSV</button>
+</div>
+</div>
+<div class="space-y-8">
+<!-- Categories -->
+<div>
+<h3 class="text-[10px] font-bold uppercase text-[#888] mb-4 flex items-center gap-2">
+<span class="w-1 h-3 bg-[#e53e3e]"></span> STRUCTURAL
+                        </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary-container/20 text-on-primary-container text-[11px] font-medium rounded-full border border-primary-container/30">Node_Density_X</span>
+<span class="px-3 py-1 bg-primary-container/20 text-on-primary-container text-[11px] font-medium rounded-full border border-primary-container/30">Layer_Activation_Sigma</span>
+<span class="px-3 py-1 bg-primary-container/20 text-on-primary-container text-[11px] font-medium rounded-full border border-primary-container/30">Backprop_Latency</span>
+<span class="px-3 py-1 bg-primary-container/20 text-on-primary-container text-[11px] font-medium rounded-full border border-primary-container/30">Kernel_Symmetry</span>
+<span class="px-3 py-1 bg-primary-container/20 text-on-primary-container text-[11px] font-medium rounded-full border border-primary-container/30">Tensor_Stride_Offset</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<h3 class="text-[10px] font-bold uppercase text-[#888] mb-4 flex items-center gap-2">
+<span class="w-1 h-3 bg-[#888]"></span> TEXTUAL
+                            </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-secondary-container/20 text-secondary text-[11px] font-medium rounded-full border border-secondary-container/30">Token_Entropy</span>
+<span class="px-3 py-1 bg-secondary-container/20 text-secondary text-[11px] font-medium rounded-full border border-secondary-container/30">Embedding_Drift</span>
+<span class="px-3 py-1 bg-secondary-container/20 text-secondary text-[11px] font-medium rounded-full border border-secondary-container/30">Vocabulary_Pruning</span>
+</div>
+</div>
+<div>
+<h3 class="text-[10px] font-bold uppercase text-[#888] mb-4 flex items-center gap-2">
+<span class="w-1 h-3 bg-[#444]"></span> EVOLUTIONARY
+                            </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-[#161616] text-[#666] text-[11px] font-medium rounded-full border border-[#222]">Crossover_Index_Alpha</span>
+<span class="px-3 py-1 bg-[#161616] text-[#666] text-[11px] font-medium rounded-full border border-[#222]">Mutation_Scale_Inv</span>
+<span class="px-3 py-1 bg-[#161616] text-[#666] text-[11px] font-medium rounded-full border border-[#222]">Fitness_Penalty_W</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Visual Artifacts -->
+<div class="fixed bottom-0 right-0 p-12 pointer-events-none opacity-5">
+<div class="w-64 h-64 border-r border-b border-[#e53e3e] absolute bottom-0 right-0"></div>
+<div class="w-32 h-32 border-r border-b border-[#e53e3e] absolute bottom-4 right-4"></div>
+</div>
+</body></html>

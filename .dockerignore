@@ -1,0 +1,30 @@
+# .dockerignore
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.venv
+venv
+ENV
+env
+.pytest_cache
+
+# Node
+frontend/node_modules
+node_modules
+.npm
+frontend/dist
+
+# Git
+.git
+.gitignore
+
+# Data & Results
+# data/             # Keep if you want to copy some start datasets
+data/results/
+test_repos/
+
+# OS
+.DS_Store
+Thumbs.db

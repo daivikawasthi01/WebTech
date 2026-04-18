@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NeuroGA - File Risk Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(28, 27, 27, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(91, 64, 62, 0.15);
+        }
+        .crimson-glow {
+            box-shadow: 0 0 15px rgba(229, 62, 62, 0.2);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e53e3e;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#353534",
+                      "outline": "#aa8986",
+                      "surface-container-high": "#2a2a2a",
+                      "tertiary-fixed": "#e4e2e2",
+                      "on-secondary": "#303031",
+                      "on-surface": "#e5e2e1",
+                      "on-primary-container": "#5c0008",
+                      "secondary-container": "#464747",
+                      "surface": "#131313",
+                      "inverse-on-surface": "#313030",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "secondary": "#c7c6c6",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#930013",
+                      "on-surface-variant": "#e4beba",
+                      "surface-tint": "#ffb3ad",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#c7c6c6",
+                      "on-tertiary": "#303030",
+                      "background": "#131313",
+                      "primary-fixed": "#ffdad7",
+                      "tertiary": "#c8c6c6",
+                      "surface-container-lowest": "#0e0e0e",
+                      "primary-container": "#ff5450",
+                      "on-primary": "#68000a",
+                      "primary": "#ffb3ad",
+                      "surface-container-low": "#1c1b1b",
+                      "surface-container-highest": "#353534",
+                      "on-tertiary-container": "#292a2a",
+                      "surface-container": "#201f1f",
+                      "tertiary-container": "#919090",
+                      "on-secondary-fixed-variant": "#464747",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-secondary-container": "#b5b5b5",
+                      "inverse-primary": "#b91c24",
+                      "error": "#ffb4ab",
+                      "on-primary-fixed": "#410004",
+                      "surface-dim": "#131313",
+                      "on-background": "#e5e2e1",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#e3e2e2",
+                      "surface-bright": "#3a3939",
+                      "inverse-surface": "#e5e2e1",
+                      "outline-variant": "#5b403e",
+                      "primary-fixed-dim": "#ffb3ad"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Inter"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-[#0a0a0a] text-on-surface overflow-x-hidden font-['Inter'] antialiased tracking-tight">
+<!-- SideNavBar Component -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-[#0e0e0e] shadow-[0_20px_40px_rgba(0,0,0,0.6)] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<div class="text-lg font-bold tracking-tighter text-neutral-100 uppercase leading-none">NEUROGA<br/>MAINTAINABILITY</div>
+<div class="text-[10px] font-bold text-[#e53e3e] mt-1 tracking-widest uppercase">Precision Diagnostics</div>
+</div>
+<nav class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="analytics">analytics</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Pipeline</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="query_stats">query_stats</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">GA Results</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="rule">rule</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Baselines</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="psychology">psychology</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Ablation</span>
+</a>
+<a class="flex items-center text-white bg-[#1c1b1b] border-l-2 border-[#e53e3e] py-3 px-6 transition-all" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="error_outline">error_outline</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">File Risk</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="data_exploration">data_exploration</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">SHAP</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="edit_note">edit_note</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Chromosome Editor</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="settings_suggest">settings_suggest</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Advanced</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="account_tree">account_tree</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Multi-Repo</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-3 px-6 transition-colors hover:bg-[#1c1b1b] duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" data-icon="science">science</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Sensitivity</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-neutral-800 space-y-1">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-2 px-6 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]" data-icon="settings">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Settings</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 py-2 px-6 transition-colors hover:bg-[#1c1b1b]" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]" data-icon="help">help</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar Component -->
+<header class="docked full-width top-0 sticky z-40 bg-[#0a0a0a]/60 backdrop-blur-md flex justify-between items-center w-full pl-72 pr-8 py-4">
+<div class="flex items-center space-x-3 text-[13px] font-medium font-['Inter']">
+<span class="text-[#e53e3e] font-semibold cursor-pointer">OBSIDIAN PULSE</span>
+<span class="text-neutral-600">/</span>
+<span class="text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors uppercase tracking-tight">PATH: /neuroga/inference/risk_assessment</span>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-[10px] font-bold text-neutral-100 uppercase tracking-[1px]">RUNNING</span>
+</div>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-[20px] text-neutral-400 hover:text-neutral-100 cursor-pointer transition-all scale-95 active:opacity-80" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[20px] text-neutral-400 hover:text-neutral-100 cursor-pointer transition-all scale-95 active:opacity-80" data-icon="settings">settings</span>
+<div class="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-neutral-500 text-[18px]" data-icon="person">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 p-8 min-h-screen">
+<!-- Header Section -->
+<section class="mb-10">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h1 class="text-4xl font-black tracking-tighter text-on-surface mb-2 uppercase">File Risk Analysis</h1>
+<p class="text-[11px] uppercase tracking-[3px] text-secondary font-medium">Neural genetic algorithm discrepancy reporting</p>
+</div>
+<div class="flex space-x-4">
+<button class="bg-[#161616] border border-[#2a2a2a] px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-on-surface flex items-center hover:bg-[#222] transition-colors">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="download">download</span> EXPORT REPORT
+                    </button>
+<button class="bg-gradient-to-tr from-inverse-primary to-primary-container px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-on-primary shadow-lg shadow-[#e53e3e]/30 hover:opacity-90 transition-all active:scale-95">
+                        RE-RUN INFERENCE
+                    </button>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="glass-panel p-5 rounded-xl flex items-center justify-between">
+<div class="relative w-1/3">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500 text-[18px]" data-icon="search">search</span>
+<input class="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl py-3 pl-12 pr-4 text-[11px] font-medium tracking-wide text-on-surface focus:border-[#e53e3e] focus:ring-0 transition-all placeholder-neutral-600" placeholder="SEARCH FILENAME, HASH OR METRIC..." type="text"/>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-3">
+<span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">SORT BY:</span>
+<select class="bg-[#121212] border border-[#2a2a2a] rounded-xl py-2.5 px-4 text-[10px] font-bold text-on-surface uppercase focus:border-[#e53e3e] focus:ring-0 transition-all cursor-pointer">
+<option>RISK LEVEL (DESC)</option>
+<option>DELTA (ASC)</option>
+<option>PREDICTED VALUE</option>
+<option>FILE NAME</option>
+</select>
+</div>
+<button class="p-2.5 bg-[#e53e3e]/10 text-[#e53e3e] rounded-xl border border-[#e53e3e]/20 hover:bg-[#e53e3e]/20 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Risk Distribution Scatter Plot -->
+<section class="mb-10">
+<div class="glass-panel rounded-2xl p-8 h-[450px] flex flex-col">
+<div class="flex justify-between items-center mb-10">
+<h3 class="text-[11px] font-black uppercase tracking-[3px] text-neutral-400">Predicted vs True Discrepancy Matrix</h3>
+<div class="flex items-center space-x-8">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-[#ef4444] shadow-[0_0_8px_#ef4444]"></span>
+<span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">High Risk</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_8px_#f59e0b]"></span>
+<span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Medium Risk</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-[#22c55e] shadow-[0_0_8px_#22c55e]"></span>
+<span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Low Risk</span>
+</div>
+</div>
+</div>
+<div class="flex-1 relative overflow-hidden">
+<!-- Faux Plotly Scatter Chart -->
+<div class="absolute inset-0 flex items-end">
+<div class="w-full h-full border-l border-b border-[#2a2a2a] relative">
+<!-- Grid lines -->
+<div class="absolute inset-x-0 top-1/4 border-t border-[#1a1a1a]/40"></div>
+<div class="absolute inset-x-0 top-2/4 border-t border-[#1a1a1a]/40"></div>
+<div class="absolute inset-x-0 top-3/4 border-t border-[#1a1a1a]/40"></div>
+<!-- Scatter Dots -->
+<div class="absolute left-[10%] bottom-[20%] w-3 h-3 bg-[#22c55e] rounded-full blur-[1px] opacity-80" title="Low Risk Point"></div>
+<div class="absolute left-[25%] bottom-[45%] w-4 h-4 bg-[#22c55e] rounded-full blur-[1px] opacity-80" title="Low Risk Point"></div>
+<div class="absolute left-[40%] bottom-[30%] w-3 h-3 bg-[#f59e0b] rounded-full blur-[1px] opacity-80" title="Med Risk Point"></div>
+<div class="absolute left-[55%] bottom-[75%] w-6 h-6 bg-[#ef4444] rounded-full blur-[2px] opacity-60 crimson-glow" title="High Risk Point"></div>
+<div class="absolute left-[65%] bottom-[85%] w-4 h-4 bg-[#ef4444] rounded-full blur-[1px] opacity-80" title="High Risk Point"></div>
+<div class="absolute left-[70%] bottom-[15%] w-3 h-3 bg-[#22c55e] rounded-full blur-[1px] opacity-80" title="Low Risk Point"></div>
+<div class="absolute left-[85%] bottom-[60%] w-5 h-5 bg-[#f59e0b] rounded-full blur-[1px] opacity-80" title="Med Risk Point"></div>
+<!-- Regression Line -->
+<svg class="absolute inset-0 w-full h-full" overflow="visible">
+<line opacity="0.15" stroke="#e53e3e" stroke-dasharray="6" stroke-width="1.5" x1="0" x2="100%" y1="100%" y2="0"></line>
+</svg>
+</div>
+</div>
+<!-- Axis Labels -->
+<div class="absolute bottom-[-30px] left-1/2 -translate-x-1/2 text-[10px] font-bold text-neutral-600 tracking-widest uppercase">True Value Correlation</div>
+<div class="absolute left-[-65px] top-1/2 -rotate-90 text-[10px] font-bold text-neutral-600 tracking-widest uppercase">Predicted variance</div>
+</div>
+</div>
+</section>
+<!-- Risk Table Section -->
+<section>
+<div class="glass-panel rounded-2xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#121212]/80 border-b border-[#2a2a2a]">
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500">File</th>
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500 text-right">Predicted</th>
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500 text-right">True</th>
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500 text-right">Delta</th>
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500 text-center">Risk Status</th>
+<th class="py-5 px-8 text-[11px] font-black uppercase tracking-widest text-neutral-500 text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="text-[12px] font-medium tracking-tight">
+<!-- High Risk Row -->
+<tr class="group border-b border-[#1a1a1a] hover:bg-[#1c1b1b] transition-colors border-l-4 border-[#e53e3e]">
+<td class="py-5 px-8 font-mono text-neutral-100">core_v3_main_optimizer.bin</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.9842</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.1245</td>
+<td class="py-5 px-8 text-right font-mono text-[#ef4444] font-bold">+0.8597</td>
+<td class="py-5 px-8 text-center">
+<span class="px-4 py-1.5 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/20 text-[#ef4444] text-[10px] font-black uppercase tracking-widest">High Risk</span>
+</td>
+<td class="py-5 px-8 text-center">
+<button class="p-1.5 hover:text-[#e53e3e] text-neutral-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Medium Risk Row -->
+<tr class="group border-b border-[#1a1a1a] hover:bg-[#1c1b1b] transition-colors">
+<td class="py-5 px-8 font-mono text-neutral-100">neural_weight_manifest_v8.json</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.4552</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.6891</td>
+<td class="py-5 px-8 text-right font-mono text-orange-500">-0.2339</td>
+<td class="py-5 px-8 text-center">
+<span class="px-4 py-1.5 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 text-[#f59e0b] text-[10px] font-black uppercase tracking-widest">Medium Risk</span>
+</td>
+<td class="py-5 px-8 text-center">
+<button class="p-1.5 hover:text-[#e53e3e] text-neutral-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Low Risk Row -->
+<tr class="group border-b border-[#1a1a1a] hover:bg-[#1c1b1b] transition-colors">
+<td class="py-5 px-8 font-mono text-neutral-100">global_config_overrides.yaml</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.9921</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.9918</td>
+<td class="py-5 px-8 text-right font-mono text-[#22c55e]">+0.0003</td>
+<td class="py-5 px-8 text-center">
+<span class="px-4 py-1.5 rounded-lg bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e] text-[10px] font-black uppercase tracking-widest">Low Risk</span>
+</td>
+<td class="py-5 px-8 text-center">
+<button class="p-1.5 hover:text-[#e53e3e] text-neutral-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group border-b border-[#1a1a1a] hover:bg-[#1c1b1b] transition-colors">
+<td class="py-5 px-8 font-mono text-neutral-100">experimental_layer_3_diff.pb</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.1102</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.3451</td>
+<td class="py-5 px-8 text-right font-mono text-orange-500">-0.2349</td>
+<td class="py-5 px-8 text-center">
+<span class="px-4 py-1.5 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 text-[#f59e0b] text-[10px] font-black uppercase tracking-widest">Medium Risk</span>
+</td>
+<td class="py-5 px-8 text-center">
+<button class="p-1.5 hover:text-[#e53e3e] text-neutral-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group border-b border-[#1a1a1a] hover:bg-[#1c1b1b] transition-colors">
+<td class="py-5 px-8 font-mono text-neutral-100">validation_set_alpha_1.h5</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.7762</td>
+<td class="py-5 px-8 text-right font-mono text-neutral-400">0.7760</td>
+<td class="py-5 px-8 text-right font-mono text-[#22c55e]">+0.0002</td>
+<td class="py-5 px-8 text-center">
+<span class="px-4 py-1.5 rounded-lg bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e] text-[10px] font-black uppercase tracking-widest">Low Risk</span>
+</td>
+<td class="py-5 px-8 text-center">
+<button class="p-1.5 hover:text-[#e53e3e] text-neutral-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<span class="text-[11px] font-bold text-neutral-500 uppercase tracking-widest">Showing 5 of 1,248 analyzed objects</span>
+<div class="flex space-x-2">
+<button class="w-10 h-10 flex items-center justify-center border border-[#2a2a2a] rounded-xl bg-transparent text-neutral-500 hover:border-[#e53e3e] hover:text-[#e53e3e] transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center border border-[#e53e3e]/40 rounded-xl bg-[#e53e3e]/10 text-[#e53e3e] font-black text-[11px]">1</button>
+<button class="w-10 h-10 flex items-center justify-center border border-[#2a2a2a] rounded-xl bg-transparent text-neutral-500 hover:border-[#e53e3e] transition-all font-black text-[11px]">2</button>
+<button class="w-10 h-10 flex items-center justify-center border border-[#2a2a2a] rounded-xl bg-transparent text-neutral-500 hover:border-[#e53e3e] transition-all font-black text-[11px]">3</button>
+<button class="w-10 h-10 flex items-center justify-center border border-[#2a2a2a] rounded-xl bg-transparent text-neutral-500 hover:border-[#e53e3e] hover:text-[#e53e3e] transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Footer Status -->
+<footer class="ml-64 bg-[#0d0d0d] border-t border-[#1a1a1a] h-12 flex items-center px-8 justify-between text-[11px] font-bold text-neutral-500 uppercase tracking-[2px]">
+<div class="flex items-center space-x-8">
+<span class="flex items-center"><span class="material-symbols-outlined text-[18px] mr-2 text-[#e53e3e]" data-icon="database">database</span> POST /API/PREDICT: 200 OK</span>
+<span class="flex items-center"><span class="material-symbols-outlined text-[18px] mr-2 text-[#e53e3e]" data-icon="memory">memory</span> VRAM USE: 84%</span>
+</div>
+<div class="flex items-center space-x-8">
+<span>REGION: US-EAST-NOIR</span>
+<span class="text-neutral-300">SYSTEM TIME: 04:22:11:09</span>
+</div>
+</footer>
+</body></html>

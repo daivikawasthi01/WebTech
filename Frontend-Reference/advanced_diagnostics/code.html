@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NeuroGA - Advanced Diagnostics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#353534",
+                    "outline": "#aa8986",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary-fixed": "#e4e2e2",
+                    "on-secondary": "#303031",
+                    "on-surface": "#e5e2e1",
+                    "on-primary-container": "#5c0008",
+                    "secondary-container": "#464747",
+                    "surface": "#131313",
+                    "inverse-on-surface": "#313030",
+                    "tertiary-fixed-dim": "#c8c6c6",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "secondary": "#c7c6c6",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#930013",
+                    "on-surface-variant": "#e4beba",
+                    "surface-tint": "#ffb3ad",
+                    "on-tertiary-fixed": "#1b1c1c",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#c7c6c6",
+                    "on-tertiary": "#303030",
+                    "background": "#131313",
+                    "primary-fixed": "#ffdad7",
+                    "tertiary": "#c8c6c6",
+                    "surface-container-lowest": "#0e0e0e",
+                    "primary-container": "#ff5450",
+                    "on-primary": "#68000a",
+                    "primary": "#ffb3ad",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-container-highest": "#353534",
+                    "on-tertiary-container": "#292a2a",
+                    "surface-container": "#201f1f",
+                    "tertiary-container": "#919090",
+                    "on-secondary-fixed-variant": "#464747",
+                    "on-tertiary-fixed-variant": "#474747",
+                    "on-secondary-container": "#b5b5b5",
+                    "inverse-primary": "#b91c24",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#410004",
+                    "surface-dim": "#131313",
+                    "on-background": "#e5e2e1",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#e3e2e2",
+                    "surface-bright": "#3a3939",
+                    "inverse-surface": "#e5e2e1",
+                    "outline-variant": "#5b403e",
+                    "primary-fixed-dim": "#ffb3ad"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #0a0a0a; color: #e5e2e1; font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(28, 27, 27, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(91, 64, 62, 0.15); }
+        .crimson-glow { box-shadow: 0 0 15px rgba(229, 62, 62, 0.3); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #e53e3e; border-radius: 2px; }
+    </style>
+</head>
+<body class="overflow-hidden font-['Inter'] antialiased tracking-tight">
+<!-- SideNavBar -->
+<aside class="bg-[#0e0e0e] h-full w-64 fixed left-0 top-0 z-40 flex flex-col py-6 shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
+<div class="px-6 mb-8">
+<h1 class="text-lg font-bold tracking-tighter text-neutral-100 uppercase">NEUROGA MAINTAINABILITY</h1>
+<p class="text-[10px] uppercase tracking-wider text-[#e53e3e] font-semibold">Precision Diagnostics</p>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">analytics</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Pipeline</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">query_stats</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">GA Results</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">rule</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Baselines</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">psychology</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Ablation</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">error_outline</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">File Risk</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">data_exploration</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">SHAP</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">edit_note</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Chromosome Editor</span>
+</a>
+<a class="flex items-center text-white bg-[#1c1b1b] border-l-4 border-[#e53e3e] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings_suggest</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Advanced</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_tree</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Multi-Repo</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">science</span>
+<span class="text-[12px] font-medium uppercase tracking-tight">Sensitivity</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-neutral-800/50 pt-4 px-4 space-y-1">
+<a class="flex items-center text-neutral-500 hover:text-neutral-100 py-2 px-2 text-[11px] font-medium uppercase tracking-tight transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]">settings</span> Settings
+        </a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-100 py-2 px-2 text-[11px] font-medium uppercase tracking-tight transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]">help</span> Support
+        </a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="bg-[#0a0a0a]/60 backdrop-blur-md sticky top-0 z-40 flex justify-between items-center w-full pl-72 pr-8 py-4">
+<div class="flex items-center space-x-2">
+<span class="text-neutral-400 text-[13px] font-['Inter'] font-medium uppercase tracking-wider">System Status:</span>
+<span class="text-[#e53e3e] text-[13px] font-['Inter'] font-bold uppercase tracking-widest">RUNNING</span>
+</div>
+<div class="flex items-center space-x-6">
+<span class="text-neutral-400 hover:text-neutral-100 cursor-pointer text-[13px] font-['Inter'] font-medium uppercase tracking-widest transition-colors">IDLE</span>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-[20px] text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors">notifications</span>
+<span class="material-symbols-outlined text-[20px] text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-neutral-500 text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 h-[calc(100vh-64px)] overflow-y-auto bg-[#0a0a0a] p-8">
+<!-- Page Header -->
+<div class="mb-10 flex justify-between items-end">
+<div>
+<p class="text-[10px] uppercase tracking-[3px] text-primary mb-2 font-bold">Diagnostics Core</p>
+<h2 class="text-4xl font-black tracking-tighter text-on-surface">NeuroGA Advanced Results</h2>
+</div>
+<div class="flex space-x-4">
+<button class="bg-[#111] px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase border border-outline-variant/20 hover:border-primary/50 transition-all">Export Data</button>
+<button class="bg-gradient-to-br from-inverse-primary to-primary-container px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase text-on-surface tracking-wider crimson-glow transition-transform active:scale-95">Re-run Analysis</button>
+</div>
+</div>
+<!-- Bento Layout -->
+<div class="grid grid-cols-12 gap-6 pb-12">
+<!-- PARETO FRONT -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-sm font-bold tracking-widest text-on-surface uppercase mb-1">PARETO FRONT</h3>
+<p class="text-[10px] text-[#444] uppercase tracking-tighter">Feature count vs Mean Squared Error</p>
+</div>
+<span class="text-[10px] font-mono text-primary bg-primary/10 px-2 py-1 rounded">/api/pareto</span>
+</div>
+<div class="relative h-[350px] w-full border-l border-b border-[#1a1a1a]">
+<div class="absolute inset-0 grid grid-cols-6 grid-rows-4">
+<div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-t border-[#111]"></div>
+<div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-t border-[#111]"></div>
+<div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-t border-[#111]"></div>
+<div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-r border-t border-[#111]"></div><div class="border-t border-[#111]"></div>
+</div>
+<div class="absolute -left-10 top-1/2 -rotate-90 text-[10px] uppercase font-bold text-[#444]">MSE Loss</div>
+<div class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase font-bold text-[#444]">Num Features</div>
+<!-- Dots -->
+<div class="absolute bottom-[80%] left-[10%] w-3 h-3 bg-red-600 rounded-full crimson-glow opacity-60"></div>
+<div class="absolute bottom-[65%] left-[15%] w-2 h-2 bg-red-600 rounded-full crimson-glow"></div>
+<div class="absolute bottom-[50%] left-[25%] w-3 h-3 bg-red-600 rounded-full crimson-glow"></div>
+<div class="absolute bottom-[40%] left-[40%] w-2 h-2 bg-red-600 rounded-full crimson-glow opacity-80"></div>
+<div class="absolute bottom-[30%] left-[55%] w-4 h-4 bg-red-600 rounded-full crimson-glow"></div>
+<div class="absolute bottom-[20%] left-[75%] w-2 h-2 bg-red-600 rounded-full crimson-glow"></div>
+<div class="absolute bottom-[10%] left-[90%] w-3 h-3 bg-red-600 rounded-full crimson-glow opacity-90"></div>
+</div>
+</div>
+<!-- POPULATION DIVERSITY -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="mb-8">
+<h3 class="text-sm font-bold tracking-widest text-on-surface uppercase mb-1">POPULATION DIVERSITY</h3>
+<p class="text-[10px] text-[#444] uppercase tracking-tighter">Genomic Entropy per Generation</p>
+</div>
+<div class="relative h-[150px] w-full mt-4">
+<svg class="w-full h-full" viewbox="0 0 400 150">
+<polyline class="crimson-glow" fill="none" points="0,120 40,110 80,130 120,90 160,85 200,60 240,75 280,45 320,50 360,20 400,25" stroke="#e53e3e" stroke-width="3"></polyline>
+<path d="M0,120 40,110 80,130 120,90 160,85 200,60 240,75 280,45 320,50 360,20 400,25 L400,150 L0,150 Z" fill="url(#grad1)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#e53e3e;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#e53e3e;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="flex justify-between mt-4 text-[9px] text-[#444] font-mono">
+<span>GEN 0</span>
+<span>GEN 500</span>
+<span>GEN 1000</span>
+</div>
+</div>
+<div class="mt-8 space-y-4">
+<div class="flex justify-between items-center border-t border-[#1a1a1a] pt-4">
+<span class="text-[10px] text-[#888] uppercase">Current Entropy</span>
+<span class="text-lg font-bold text-primary">0.842</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-[#888] uppercase">Convergence Rate</span>
+<span class="text-lg font-bold text-primary">High</span>
+</div>
+</div>
+</div>
+<!-- BOOTSTRAP CONFIDENCE INTERVALS -->
+<div class="col-span-12 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h3 class="text-sm font-bold tracking-widest text-on-surface uppercase mb-1">BOOTSTRAP CONFIDENCE INTERVALS</h3>
+<p class="text-[10px] text-[#444] uppercase tracking-tighter">95% Confidence bounds via POST /api/stats/bootstrap</p>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-full bg-red-600"></span>
+<span class="text-[10px] text-[#888] uppercase">Significant at p &lt; 0.05</span>
+</div>
+</div>
+<div class="space-y-12 max-w-4xl">
+<div class="flex items-center">
+<div class="w-32 text-[10px] font-bold uppercase tracking-widest text-[#888]">Learning Rate</div>
+<div class="flex-1 relative h-1 bg-[#1a1a1a]">
+<div class="absolute left-[30%] right-[30%] top-1/2 -translate-y-1/2 h-0.5 bg-red-600">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-red-600"></div>
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-red-600"></div>
+</div>
+<div class="absolute left-[45%] w-[10%] top-1/2 -translate-y-1/2 h-4 bg-surface-container-highest border border-red-600/30"></div>
+</div>
+<div class="w-24 text-right text-[12px] font-mono text-on-surface font-bold">± 0.012</div>
+</div>
+<div class="flex items-center">
+<div class="w-32 text-[10px] font-bold uppercase tracking-widest text-[#888]">Weight Decay</div>
+<div class="flex-1 relative h-1 bg-[#1a1a1a]">
+<div class="absolute left-[20%] right-[40%] top-1/2 -translate-y-1/2 h-0.5 bg-red-600">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-red-600"></div>
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-red-600"></div>
+</div>
+<div class="absolute left-[35%] w-[15%] top-1/2 -translate-y-1/2 h-4 bg-surface-container-highest border border-red-600/30"></div>
+</div>
+<div class="w-24 text-right text-[12px] font-mono text-on-surface font-bold">± 0.045</div>
+</div>
+</div>
+</div>
+<!-- System Logs -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<h4 class="text-[10px] font-black uppercase text-primary mb-4 tracking-[2px]">System Logs</h4>
+<div class="space-y-2 font-mono text-[10px] text-[#666]">
+<p><span class="text-red-600/60">[09:44:21]</span> Fetching pareto frontier from /api/pareto...</p>
+<p><span class="text-red-600/60">[09:44:22]</span> Success. 142 valid candidates found.</p>
+<p><span class="text-red-600/60">[09:44:25]</span> Calculating bootstrap CI with 10,000 iterations...</p>
+<p><span class="text-red-600/60">[09:44:28]</span> Diversity index stabilized at 0.84.</p>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-6 bg-[#111] rounded-xl p-6 relative overflow-hidden group border border-outline-variant/10">
+<div class="relative z-10">
+<h4 class="text-sm font-bold uppercase text-on-surface mb-2">Genetic Algorithm Optimization</h4>
+<p class="text-[11px] text-[#888] leading-relaxed max-w-sm">The current run is utilizing elite-based selection with a 15% mutation rate. Pareto front indicates a strong trade-off between model complexity and performance.</p>
+</div>
+<div class="absolute top-0 right-0 p-4">
+<span class="material-symbols-outlined text-red-600/10 text-8xl group-hover:text-red-600/30 transition-colors">settings_suggest</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

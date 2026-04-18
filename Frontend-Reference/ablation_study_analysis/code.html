@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#353534",
+                    "outline": "#aa8986",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary-fixed": "#e4e2e2",
+                    "on-secondary": "#303031",
+                    "on-surface": "#e5e2e1",
+                    "on-primary-container": "#5c0008",
+                    "secondary-container": "#464747",
+                    "surface": "#131313",
+                    "inverse-on-surface": "#313030",
+                    "tertiary-fixed-dim": "#c8c6c6",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "secondary": "#c7c6c6",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#930013",
+                    "on-surface-variant": "#e4beba",
+                    "surface-tint": "#ffb3ad",
+                    "on-tertiary-fixed": "#1b1c1c",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#c7c6c6",
+                    "on-tertiary": "#303030",
+                    "background": "#131313",
+                    "primary-fixed": "#ffdad7",
+                    "tertiary": "#c8c6c6",
+                    "surface-container-lowest": "#0e0e0e",
+                    "primary-container": "#ff5450",
+                    "on-primary": "#68000a",
+                    "primary": "#ffb3ad",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-container-highest": "#353534",
+                    "on-tertiary-container": "#292a2a",
+                    "surface-container": "#201f1f",
+                    "tertiary-container": "#919090",
+                    "on-secondary-fixed-variant": "#464747",
+                    "on-tertiary-fixed-variant": "#474747",
+                    "on-secondary-container": "#b5b5b5",
+                    "inverse-primary": "#b91c24",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#410004",
+                    "surface-dim": "#131313",
+                    "on-background": "#e5e2e1",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#e3e2e2",
+                    "surface-bright": "#3a3939",
+                    "inverse-surface": "#e5e2e1",
+                    "outline-variant": "#5b403e",
+                    "primary-fixed-dim": "#ffb3ad"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+        }
+        .noir-glass {
+            background: rgba(22, 22, 22, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .pulse-glow {
+            box-shadow: 0 0 12px rgba(229, 62, 62, 0.3);
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-white antialiased">
+<!-- SideNavBar Component: rounded_sidebar -->
+<nav class="h-full rounded-r-[12px] w-64 fixed left-0 top-0 z-40 bg-[#0e0e0e] flex flex-col py-6 shadow-[0_20px_40px_rgba(0,0,0,0.6)] font-['Inter'] antialiased tracking-tight">
+<div class="px-6 mb-8">
+<h1 class="text-lg font-bold tracking-tighter text-neutral-100 uppercase">NEUROGA</h1>
+<p class="text-[10px] leading-tight tracking-[1px] uppercase font-bold text-neutral-500 mt-1">MAINTAINABILITY</p>
+<p class="text-[9px] uppercase tracking-widest text-[#e53e3e] mt-1">Precision Diagnostics</p>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">analytics</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Pipeline</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">query_stats</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">GA Results</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">rule</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Baselines</span>
+</a>
+<!-- Active State: Ablation -->
+<a class="flex items-center text-white bg-[#1c1b1b] border-l-[3px] border-[#e53e3e] py-3 px-4 transition-opacity active:opacity-90" href="#">
+<span class="material-symbols-outlined mr-3 text-lg text-[#e53e3e]">psychology</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Ablation</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">error_outline</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">File Risk</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">data_exploration</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">SHAP</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">edit_note</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Chromosome Editor</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">settings_suggest</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Advanced</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">account_tree</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Multi-Repo</span>
+</a>
+<a class="flex items-center text-neutral-500 hover:text-neutral-300 hover:bg-[#1c1b1b] py-3 px-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">science</span>
+<span class="text-[13px] font-bold uppercase tracking-tight">Sensitivity</span>
+</a>
+</div>
+<div class="mt-auto pt-6 border-t border-[#1a1a1a]">
+<a class="text-neutral-500 hover:text-neutral-300 px-6 py-2 flex items-center transition-all text-[12px] font-bold uppercase tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">settings</span>
+                Settings
+            </a>
+<a class="text-neutral-500 hover:text-neutral-300 px-6 py-2 flex items-center transition-all text-[12px] font-bold uppercase tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">help</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- TopAppBar Component: breadcrumb_header -->
+<header class="flex justify-between items-center w-full pl-72 pr-8 py-4 sticky top-0 z-40 bg-[#0a0a0a]/60 backdrop-blur-md text-[13px] font-medium font-['Inter']">
+<div class="flex items-center gap-4">
+<span class="text-[#e53e3e] font-semibold uppercase tracking-widest text-[11px]">OBSIDIAN PULSE</span>
+<span class="w-[1px] h-3 bg-[#222]"></span>
+<span class="text-neutral-400 uppercase tracking-tighter text-[10px]">PATH: /api/results/ablation</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#e53e3e] animate-pulse"></span>
+<span class="text-[#e53e3e] font-semibold uppercase text-[10px]">RUNNING</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors text-lg">notifications</span>
+<span class="material-symbols-outlined text-neutral-400 hover:text-neutral-100 cursor-pointer transition-colors text-lg">settings</span>
+<div class="w-7 h-7 rounded-sm bg-[#1a1a1a] overflow-hidden border border-[#222]">
+<img alt="User Profile" class="w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2t_pzebsHsZ0KHzh7MkyLi_zUck3hQ8V8jtNoRlBWoHwzC2dpm71reXEZ4nadwN6_nGii0KxtUYdVfS2suEiGsiIhgcS-u5p37FU6N5Y6A5POMVSgNu92anKjOqigHs6USExxU5E22vkwmJPFZLsoQIKpQ3kWpJTPpsopnbq5FdIifcE0C76yF-faPyhJ9vFlpWd6FHWsAS_YWvax3yRx41zOSlY4jXcydclFJcoh8xXw8rdSydGe0l3T17ij7Kx8tftVpNe5nY8"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 min-h-screen p-8">
+<div class="max-w-[1400px] mx-auto">
+<!-- Dashboard Header Section -->
+<div class="mb-12 flex justify-between items-end">
+<div class="space-y-1">
+<p class="text-[10px] uppercase tracking-[2px] text-neutral-500 font-bold">Analytical Module // 04-A</p>
+<h2 class="text-3xl font-black text-[#e5e5e5] tracking-tighter">NeuroGA Ablation Analysis</h2>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 bg-[#111] border border-[#222] text-[#888] rounded-lg text-[10px] font-bold uppercase tracking-widest hover:border-neutral-500 transition-all">Export JSON</button>
+<button class="px-6 py-2 bg-gradient-to-r from-inverse-primary to-primary-container text-white rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40 hover:brightness-110 active:scale-95 transition-all">Re-Run Analysis</button>
+</div>
+</div>
+<!-- Main Data Grid -->
+<div class="grid grid-cols-12 gap-8 mb-8">
+<!-- Left Card: MSE Performance -->
+<div class="col-span-12 lg:col-span-7 noir-glass rounded-xl p-8 shadow-2xl">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-[13px] font-bold text-[#e5e5e5] uppercase tracking-tight">MSE PERFORMANCE BY COMBINATION</h3>
+<p class="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">Cross-validation stability metrics</p>
+</div>
+<span class="material-symbols-outlined text-neutral-500">more_vert</span>
+</div>
+<div class="space-y-6">
+<!-- Bar Rows -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono tracking-tighter">
+<div class="flex items-center gap-2">
+<span class="text-[#e5e5e5]">A + B + C + D</span>
+<span class="px-2 py-0.5 bg-[#e53e3e] text-white text-[9px] font-bold rounded uppercase">OPTIMIZED</span>
+</div>
+<span class="text-[#e53e3e] font-black">0.0042 MSE</span>
+</div>
+<div class="h-2 w-full bg-[#0a0a0a] rounded-full overflow-hidden">
+<div class="h-full w-[95%] bg-[#e53e3e] pulse-glow"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono tracking-tighter">
+<span class="text-[#888]">A + B + C</span>
+<span class="text-[#e5e5e5]">0.0128 MSE</span>
+</div>
+<div class="h-2 w-full bg-[#0a0a0a] rounded-full overflow-hidden">
+<div class="h-full w-[78%] bg-[#444]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono tracking-tighter">
+<span class="text-[#888]">A + B + D</span>
+<span class="text-[#e5e5e5]">0.0156 MSE</span>
+</div>
+<div class="h-2 w-full bg-[#0a0a0a] rounded-full overflow-hidden">
+<div class="h-full w-[70%] bg-[#444]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono tracking-tighter">
+<span class="text-[#888]">B + C + D</span>
+<span class="text-[#e5e5e5]">0.0211 MSE</span>
+</div>
+<div class="h-2 w-full bg-[#0a0a0a] rounded-full overflow-hidden">
+<div class="h-full w-[62%] bg-[#444]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-mono tracking-tighter">
+<span class="text-[#888]">A + C</span>
+<span class="text-[#e5e5e5]">0.0349 MSE</span>
+</div>
+<div class="h-2 w-full bg-[#0a0a0a] rounded-full overflow-hidden">
+<div class="h-full w-[45%] bg-[#444]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Card: Performance Summary Index -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-8">
+<div class="noir-glass rounded-xl p-8 flex-1">
+<h3 class="text-[13px] font-bold text-[#e5e5e5] uppercase tracking-tight mb-6">PERFORMANCE SUMMARY INDEX</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-[11px] font-mono">
+<thead>
+<tr class="text-neutral-500 border-b border-[#222]">
+<th class="pb-3 text-left font-bold uppercase tracking-widest">SET</th>
+<th class="pb-3 text-right font-bold uppercase tracking-widest">MSE_VAL</th>
+<th class="pb-3 text-right font-bold uppercase tracking-widest">DELTA</th>
+</tr>
+</thead>
+<tbody class="text-[#e5e5e5]">
+<tr class="border-b border-[#161616]">
+<td class="py-4 font-bold">FULL_GEN</td>
+<td class="py-4 text-right">0.0042</td>
+<td class="py-4 text-right text-[#22c55e]">0.00%</td>
+</tr>
+<tr class="border-b border-[#161616]">
+<td class="py-4 font-bold">DROP_CNN</td>
+<td class="py-4 text-right">0.0128</td>
+<td class="py-4 text-right text-[#e53e3e]">+204.7%</td>
+</tr>
+<tr class="border-b border-[#161616]">
+<td class="py-4 font-bold">DROP_RELU</td>
+<td class="py-4 text-right">0.0156</td>
+<td class="py-4 text-right text-[#e53e3e]">+271.4%</td>
+</tr>
+<tr>
+<td class="py-4 font-bold">RANDOM_S</td>
+<td class="py-4 text-right">0.0921</td>
+<td class="py-4 text-right text-[#e53e3e]">+2092%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Small Stat Block -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-[#111] p-6 rounded-lg border border-[#1a1a1a]">
+<p class="text-[9px] text-neutral-500 uppercase tracking-[2px] font-bold">System Stability</p>
+<p class="text-2xl font-black text-[#e5e5e5] mt-2">99.42%</p>
+</div>
+<div class="bg-[#111] p-6 rounded-lg border border-[#1a1a1a]">
+<p class="text-[9px] text-neutral-500 uppercase tracking-[2px] font-bold">Error Margin</p>
+<p class="text-2xl font-black text-[#e53e3e] mt-2">±0.002</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Sections: Bento Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Topology Module -->
+<div class="bg-[#0e0e0e] rounded-xl p-8 border border-[#1a1a1a]">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-[#e53e3e]">account_tree</span>
+<h3 class="text-[13px] font-bold text-[#e5e5e5] uppercase tracking-tight">Active Topology Configuration</h3>
+</div>
+<div class="space-y-4 text-[12px] leading-relaxed text-[#888]">
+<p>The NeuroGA kernel is currently operating on a 12-layer deep-residual architecture. Ablation results indicate that layers 4 through 9 are the primary drivers of feature extraction.</p>
+<div class="p-4 bg-[#0a0a0a] rounded border border-[#222] font-mono text-[10px]">
+                            KERNEL_VERSION: 1.0.4-NOIR <br/>
+                            PARALLEL_TRAJECTORY: TRUE <br/>
+                            OPTIMIZER: ADAMW_DYNAMIC
+                        </div>
+</div>
+</div>
+<!-- Regression Analysis -->
+<div class="bg-[#0e0e0e] rounded-xl p-8 border border-[#1a1a1a]">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-[#e53e3e]">trending_up</span>
+<h3 class="text-[13px] font-bold text-[#e5e5e5] uppercase tracking-tight">Regression Text Block Analysis</h3>
+</div>
+<div class="space-y-4 text-[12px] leading-relaxed text-[#888]">
+<p>Linear regression modeling suggests a non-linear relationship between feature pruning and loss divergence. The "A+B+C+D" configuration represents the local global minimum.</p>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-[#1a1a1a] rounded-full text-[9px] font-bold text-neutral-500 uppercase tracking-widest border border-[#222]">COEF: 0.842</span>
+<span class="px-3 py-1 bg-[#1a1a1a] rounded-full text-[9px] font-bold text-neutral-500 uppercase tracking-widest border border-[#222]">P-VAL: &lt; 0.001</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<footer class="mt-12 pt-8 border-t border-[#1a1a1a] flex justify-between items-center opacity-30 transition-all hover:opacity-100">
+<div class="flex gap-8">
+<div class="space-y-1">
+<p class="text-[8px] font-black uppercase tracking-[2px]">Core Build</p>
+<p class="text-[10px] font-mono">v8.21.0-STABLE</p>
+</div>
+<div class="space-y-1">
+<p class="text-[8px] font-black uppercase tracking-[2px]">Node Entropy</p>
+<p class="text-[10px] font-mono">LOW_VAR</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-[9px] uppercase font-bold tracking-[3px]">Secure Environment / Protocol 9</p>
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+</footer>
+</div>
+</main>
+</body></html>
