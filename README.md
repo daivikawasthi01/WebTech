@@ -1,7 +1,7 @@
 # Automated Software Maintainability Assessment
 ### Hybrid Neuro-Genetic Framework
 
-> **Course**: Soft Computing &nbsp;|&nbsp; **Authors**: Daivik Awasthi (`2023UIT3079`) · Manik Gaur (`2023UIT3062`)
+> **Course**: Soft Computing &nbsp;|&nbsp; **Authors**: Daivik Awasthi
 >
 > *Department of Information Technology, Netaji Subhas University of Technology, India*
 
@@ -452,7 +452,7 @@ All versions are pinned in `requirements.txt` for full reproducibility.
 
 <div align="center">
 
-**Daivik Awasthi** (`2023UIT3079`) · **Manik Gaur** (`2023UIT3062`)
+**Daivik Awasthi** (`2023UIT3079`)
 
 Department of Information Technology, NSUT India &nbsp;|&nbsp; April 2026
 
