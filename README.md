@@ -450,23 +450,6 @@ All versions are pinned in `requirements.txt` for full reproducibility.
 
 ---
 
-## Submission Checklist
-
-| Requirement | Status |
-|---|---|
-| Code is properly commented and well-organised | ✅ |
-| README explains how to run the code | ✅ |
-| Software/tools/libraries with versions documented | ✅ |
-| Input and output format specified | ✅ |
-| Roll Numbers included in submission metadata | ✅ |
-| Code is original and not copied | ✅ |
-| Code runs without errors on Flask, Requests, FastAPI | ✅ |
-| All dependencies pinned for reproducibility | ✅ |
-| Tested across multiple repositories | ✅ |
-| Docker support for environment consistency | ✅ |
-
----
-
 <div align="center">
 
 **Daivik Awasthi** (`2023UIT3079`) · **Manik Gaur** (`2023UIT3062`)
